@@ -1,0 +1,56 @@
+[
+  {
+    "activeColor": "rgb(58, 62, 69)",
+    "artboard": {
+      "bottom": 631.4921875,
+      "height": 506.9921875,
+      "left": 459.34375,
+      "right": 816.65625,
+      "top": 124.5,
+      "width": 357.3125,
+      "x": 459.34375,
+      "y": 124.5
+    },
+    "height": 720,
+    "rootColor": "rgb(17, 19, 23)",
+    "scrollWidth": 1280,
+    "toolColor": "rgb(58, 62, 69)",
+    "width": 1280
+  },
+  {
+    "activeColor": "rgb(58, 62, 69)",
+    "artboard": {
+      "bottom": 811.484375,
+      "height": 686.984375,
+      "left": 480.9140625,
+      "right": 965.078125,
+      "top": 124.5,
+      "width": 484.1640625,
+      "x": 480.9140625,
+      "y": 124.5
+    },
+    "height": 900,
+    "rootColor": "rgb(17, 19, 23)",
+    "scrollWidth": 1440,
+    "toolColor": "rgb(58, 62, 69)",
+    "width": 1440
+  },
+  {
+    "activeColor": "rgb(58, 62, 69)",
+    "artboard": {
+      "bottom": 991.4921875,
+      "height": 866.9921875,
+      "left": 658.484375,
+      "right": 1269.5078125,
+      "top": 124.5,
+      "width": 611.0234375,
+      "x": 658.484375,
+      "y": 124.5
+    },
+    "height": 1080,
+    "rootColor": "rgb(17, 19, 23)",
+    "scrollWidth": 1920,
+    "toolColor": "rgb(58, 62, 69)",
+    "width": 1920
+  }
+]

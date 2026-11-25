@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 4,
+  "events": 5,
+  "pageTemplate": "events",
+  "components": [
+    "table",
+    "index"
+  ],
+  "cellOverrides": {
+    "299afbc7-93c8-41cb-ab95-a3827e370871:0": {
+      "fill": "#e8e3d8"
+    }
+  },
+  "columns": [
+    {
+      "label": "企画名",
+      "field": "name",
+      "weight": 63.06349206349206
+    },
+    {
+      "label": "場所",
+      "field": "placeShort",
+      "weight": 36.93650793650794
+    }
+  ]
+}

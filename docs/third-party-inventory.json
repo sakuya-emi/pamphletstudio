@@ -1,0 +1,805 @@
+{
+  "scope": "Installed JavaScript packages (runtime and development); declared metadata, not a per-file legal audit",
+  "packages": [
+    {
+      "name": "pako",
+      "version": "1.0.11",
+      "declaredLicense": "(MIT AND Zlib)"
+    },
+    {
+      "name": "immediate",
+      "version": "3.0.6",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "lie",
+      "version": "3.3.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "performance-now",
+      "version": "2.1.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "fast-png",
+      "version": "6.4.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "canvg",
+      "version": "3.0.11",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "jspdf",
+      "version": "3.0.4",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "html2canvas",
+      "version": "1.4.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "core-js",
+      "version": "3.51.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "dompurify",
+      "version": "3.4.17",
+      "declaredLicense": "(MPL-2.0 OR Apache-2.0)"
+    },
+    {
+      "name": "fflate",
+      "version": "0.8.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tinyspy",
+      "version": "4.0.6",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "loupe",
+      "version": "3.2.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "pathval",
+      "version": "2.0.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "js-tokens",
+      "version": "9.0.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "gensync",
+      "version": "1.0.0-beta.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "setimmediate",
+      "version": "1.0.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "esbuild",
+      "version": "0.28.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "raf",
+      "version": "3.4.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "nanoid",
+      "version": "3.3.20",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "postcss",
+      "version": "8.5.32",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "picocolors",
+      "version": "1.1.1",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "source-map-js",
+      "version": "1.2.2",
+      "declaredLicense": "BSD-3-Clause"
+    },
+    {
+      "name": "js-tokens",
+      "version": "4.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "semver",
+      "version": "6.3.2",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "json5",
+      "version": "2.2.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "convert-source-map",
+      "version": "2.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "debug",
+      "version": "4.4.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tslib",
+      "version": "1.14.1",
+      "declaredLicense": "0BSD"
+    },
+    {
+      "name": "pdf-lib",
+      "version": "1.17.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "csstype",
+      "version": "3.2.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tinyglobby",
+      "version": "0.2.17",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "picomatch",
+      "version": "4.0.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tsx",
+      "version": "4.23.15",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "fdir",
+      "version": "6.5.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "vite",
+      "version": "6.4.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "rollup",
+      "version": "4.67.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "esbuild",
+      "version": "0.25.12",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "fsevents",
+      "version": "2.3.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "font-family-papandreou",
+      "version": "0.2.0-patch2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "chai",
+      "version": "5.3.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tinyrainbow",
+      "version": "2.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "siginfo",
+      "version": "2.0.0",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "isarray",
+      "version": "1.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "cssesc",
+      "version": "3.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "escalade",
+      "version": "3.2.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "ms",
+      "version": "2.1.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "why-is-node-running",
+      "version": "2.3.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "stackback",
+      "version": "0.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "yallist",
+      "version": "3.1.1",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "tinybench",
+      "version": "2.9.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "react-refresh",
+      "version": "0.17.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "svg-pathdata",
+      "version": "6.0.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "pathe",
+      "version": "2.0.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "check-error",
+      "version": "2.1.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "string_decoder",
+      "version": "1.1.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "safe-buffer",
+      "version": "5.1.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "node-releases",
+      "version": "2.0.63",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "specificity",
+      "version": "0.4.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "base64-arraybuffer",
+      "version": "1.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "utrie",
+      "version": "1.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "css-line-break",
+      "version": "2.1.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "caniuse-lite",
+      "version": "1.0.30001820",
+      "declaredLicense": "CC-BY-4.0"
+    },
+    {
+      "name": "expect-type",
+      "version": "1.4.0",
+      "declaredLicense": "Apache-2.0"
+    },
+    {
+      "name": "estree-walker",
+      "version": "3.0.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "magic-string",
+      "version": "0.30.21",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tinyexec",
+      "version": "0.3.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "inherits",
+      "version": "2.0.4",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "lucide-react",
+      "version": "0.468.0",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "react",
+      "version": "19.3.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "jsesc",
+      "version": "3.1.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "std-env",
+      "version": "3.10.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "typescript",
+      "version": "5.9.3",
+      "declaredLicense": "Apache-2.0"
+    },
+    {
+      "name": "core-util-is",
+      "version": "1.0.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "text-segmentation",
+      "version": "1.0.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "pako",
+      "version": "2.2.0",
+      "declaredLicense": "(MIT AND Zlib)"
+    },
+    {
+      "name": "vitest",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "tinypool",
+      "version": "1.1.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "vite-node",
+      "version": "3.2.4",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "svg2pdf.js",
+      "version": "2.9.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "svgpath",
+      "version": "2.6.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "cac",
+      "version": "6.7.14",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "es-module-lexer",
+      "version": "1.7.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "baseline-browser-mapping",
+      "version": "2.11.35",
+      "declaredLicense": "Apache-2.0"
+    },
+    {
+      "name": "browserslist",
+      "version": "4.29.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "update-browserslist-db",
+      "version": "1.3.4",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "strip-literal",
+      "version": "3.1.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "undici-types",
+      "version": "6.21.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "regenerator-runtime",
+      "version": "0.13.11",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "stackblur-canvas",
+      "version": "2.7.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "rgbcolor",
+      "version": "1.0.1",
+      "declaredLicense": "MIT OR SEE LICENSE IN FEEL-FREE.md"
+    },
+    {
+      "name": "idb-keyval",
+      "version": "6.3.0",
+      "declaredLicense": "Apache-2.0"
+    },
+    {
+      "name": "lru-cache",
+      "version": "5.1.1",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "process-nextick-args",
+      "version": "2.0.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "electron-to-chromium",
+      "version": "1.5.477",
+      "declaredLicense": "ISC"
+    },
+    {
+      "name": "assertion-error",
+      "version": "2.0.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "scheduler",
+      "version": "0.28.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "deep-eql",
+      "version": "5.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "prettier",
+      "version": "3.9.10",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "iobuffer",
+      "version": "5.4.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.3.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "jszip",
+      "version": "3.10.2",
+      "declaredLicense": "(MIT OR GPL-3.0-or-later)"
+    },
+    {
+      "name": "readable-stream",
+      "version": "2.3.8",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "pdfjs-dist",
+      "version": "4.10.38",
+      "declaredLicense": "Apache-2.0"
+    },
+    {
+      "name": "@pdf-lib/upng",
+      "version": "1.0.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/runtime",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@esbuild/darwin-x64",
+      "version": "0.28.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@pdf-lib/standard-fonts",
+      "version": "1.0.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/plugin-transform-react-jsx-source",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-plugin-utils",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/core",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-validator-identifier",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/code-frame",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/deep-eql",
+      "version": "4.0.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/types",
+      "version": "7.29.11",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/template",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-module-transforms",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/parser",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/generator",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-compilation-targets",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/traverse",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helpers",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@jridgewell/remapping",
+      "version": "2.3.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@rollup/rollup-darwin-x64",
+      "version": "4.67.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/react",
+      "version": "19.3.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/node",
+      "version": "22.20.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@jridgewell/resolve-uri",
+      "version": "3.1.2",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-string-parser",
+      "version": "7.29.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@jridgewell/trace-mapping",
+      "version": "0.3.31",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@jridgewell/gen-mapping",
+      "version": "0.3.13",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/compat-data",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/chai",
+      "version": "5.2.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/spy",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/utils",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/expect",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-validator-option",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/pako",
+      "version": "2.0.4",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@napi-rs/canvas-darwin-x64",
+      "version": "0.1.100",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/babel__core",
+      "version": "7.20.5",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@rolldown/pluginutils",
+      "version": "1.0.0-beta.27",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "4.7.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/plugin-transform-react-jsx-self",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@jridgewell/sourcemap-codec",
+      "version": "1.6.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/mocker",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/raf",
+      "version": "3.4.3",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/pretty-format",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@esbuild/darwin-x64",
+      "version": "0.25.12",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/trusted-types",
+      "version": "2.0.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/estree",
+      "version": "1.0.10",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-globals",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/snapshot",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@vitest/runner",
+      "version": "3.2.7",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@pdf-lib/fontkit",
+      "version": "1.1.1",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "19.3.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/babel__template",
+      "version": "7.4.4",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/babel__generator",
+      "version": "7.27.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@types/babel__traverse",
+      "version": "7.28.0",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@napi-rs/canvas",
+      "version": "0.1.100",
+      "declaredLicense": "MIT"
+    },
+    {
+      "name": "@babel/helper-module-imports",
+      "version": "7.29.7",
+      "declaredLicense": "MIT"
+    }
+  ]
+}

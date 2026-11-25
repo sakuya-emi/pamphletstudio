@@ -1,0 +1,190 @@
+{
+  "recordedAt": "2026-11-06T11:06:59.579351+00:00",
+  "files": [
+    {
+      "path": "docs/research/designcraft/ASSETS.md",
+      "sha256": "4160626161488a04a3fa5cf36ba90322a23f497506590fed3068de4dab769aa7",
+      "bytes": 24871
+    },
+    {
+      "path": "docs/research/designcraft/Cargo.toml",
+      "sha256": "c7c2cd8c70efe2f425b9f3679e32d743fa06956a1047472597df3a2b95eb1fb4",
+      "bytes": 9537
+    },
+    {
+      "path": "docs/research/designcraft/LICENSE-APACHE",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
+    },
+    {
+      "path": "docs/research/designcraft/LICENSE-MIT",
+      "sha256": "d543d31e3120c64b70abc77cfadcbdc2249c78de1c8efa2e3d62540bb79de816",
+      "bytes": 1103
+    },
+    {
+      "path": "docs/research/designcraft/NOTICE",
+      "sha256": "4ddbd3d97b36ae2188fe2c70af163c29b15086d7241675b7ea63f0df6080b80a",
+      "bytes": 18606
+    },
+    {
+      "path": "docs/research/designcraft/README.md",
+      "sha256": "02a45e06061ed08a5551d0d6ee75e88f3b769eebd044e4ac7ef1fabe65f47292",
+      "bytes": 29189
+    },
+    {
+      "path": "docs/research/designcraft/apps/designcraft-web/Cargo.toml",
+      "sha256": "9ffcf04eff942d8023fb94783cac555b744a4d0852829e183b3906f3bbeec6bb",
+      "bytes": 1107
+    },
+    {
+      "path": "docs/research/designcraft/apps/designcraft-web/src/main.rs",
+      "sha256": "8b3a81719b7eb9c918257f499353d82bf03bb9da575f2965d04ea2ed081d6a2f",
+      "bytes": 1518
+    },
+    {
+      "path": "docs/research/designcraft/commit.json",
+      "sha256": "54236f6f7810bc238806349d62e6f952a968eb1d6085b6304a84adc8472f003c",
+      "bytes": 39447
+    },
+    {
+      "path": "docs/research/designcraft/crates/compose/Cargo.toml",
+      "sha256": "8731034942b36c6f3293b424caf0d848724d5b4b19c79bbe9ee935f6d268e56f",
+      "bytes": 1020
+    },
+    {
+      "path": "docs/research/designcraft/crates/compose/src/lib.rs",
+      "sha256": "48be5ca4fca4f10752cb80824e815b9127bb6ac704f73b58c3862876dd5fb160",
+      "bytes": 253563
+    },
+    {
+      "path": "docs/research/designcraft/crates/doc/Cargo.toml",
+      "sha256": "3479fb5abc13d299ea21eb851b2101f8be957c2e474c984d49fb1eb19fc784f6",
+      "bytes": 522
+    },
+    {
+      "path": "docs/research/designcraft/crates/doc/src/lib.rs",
+      "sha256": "8349c982a5cad876bca0179232f11d3c163de8cae9b84a13f8f0b935b20877dd",
+      "bytes": 47289
+    },
+    {
+      "path": "docs/research/designcraft/crates/engine/Cargo.toml",
+      "sha256": "e6348c569f550eb23a464978076b6cf0d133be8bb5a067ff9619c88c09d917f3",
+      "bytes": 1765
+    },
+    {
+      "path": "docs/research/designcraft/crates/engine/src/lib.rs",
+      "sha256": "d50ec6d05a52ecee05430faa3a20b11607bb8d7750643459bec34cb51e9c4389",
+      "bytes": 35186
+    },
+    {
+      "path": "docs/research/designcraft/crates/geom/Cargo.toml",
+      "sha256": "edc97aa2511b227b7ac7920f952ace0357c1dfe66a6ad20e693a813ee4572520",
+      "bytes": 493
+    },
+    {
+      "path": "docs/research/designcraft/crates/geom/src/lib.rs",
+      "sha256": "4a77ea98c8757bb9ab70fdb978b18ebdad60b3c9b98583e018942d93a286a48a",
+      "bytes": 3467
+    },
+    {
+      "path": "docs/research/designcraft/docs/architecture.md",
+      "sha256": "289b11bacd0417059bc559673a66cfde0a5bf3db0cfa5c0225455b1cb1fc9a0c",
+      "bytes": 9033
+    },
+    {
+      "path": "docs/research/vectorcraft/ASSETS.md",
+      "sha256": "daeabfd70c7706ad28b7c3b530f5410a051c52d7e80bf2fc190e82dfe6db7af7",
+      "bytes": 64972
+    },
+    {
+      "path": "docs/research/vectorcraft/Cargo.toml",
+      "sha256": "896acccd6eae0ed726aece73eeed8a6e4ba496b73a27e9fa3f69df1c359a8e18",
+      "bytes": 9989
+    },
+    {
+      "path": "docs/research/vectorcraft/LICENSE-APACHE",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
+    },
+    {
+      "path": "docs/research/vectorcraft/LICENSE-MIT",
+      "sha256": "8b6025dc4b707e0fb08b9c2054096f1be3ae61529399aa2c348dec676562dc71",
+      "bytes": 1103
+    },
+    {
+      "path": "docs/research/vectorcraft/NOTICE",
+      "sha256": "bd923fe0b697afe49943454e199078bf7b5d1af847ea2aabaffa396c17bd4943",
+      "bytes": 8174
+    },
+    {
+      "path": "docs/research/vectorcraft/README.md",
+      "sha256": "56cd381be7e2f89423a444cace45a0ea7e73a9c446c0d2959d01a67dc1daf975",
+      "bytes": 28043
+    },
+    {
+      "path": "docs/research/vectorcraft/apps/vectorcraft-web/Cargo.toml",
+      "sha256": "0fd793b6a4dadc4eb824bcd9609df3ec4c24de8c4f7566d2ce5678d423a4f423",
+      "bytes": 1415
+    },
+    {
+      "path": "docs/research/vectorcraft/apps/vectorcraft-web/src/main.rs",
+      "sha256": "fe7f7ddb0741559f32b8625b14b04ffde07ed8cd5f625b0686d2b0c7ef675094",
+      "bytes": 1824
+    },
+    {
+      "path": "docs/research/vectorcraft/commit.json",
+      "sha256": "cb02cf34ca32dfee6058a406565a6b2429e9d9ea7bf8cd56fd3f093a296ed2b4",
+      "bytes": 36692
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/doc/Cargo.toml",
+      "sha256": "b8564c333edcfcf72918c0459fcca535e431d21e9de7e4e1ee1585441f33af6a",
+      "bytes": 771
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/doc/src/lib.rs",
+      "sha256": "f3e736d777d786c55cac45bb78cd1e00effcb16589259231338e4cbcae4b25d7",
+      "bytes": 17178
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/geom/Cargo.toml",
+      "sha256": "20a12c72ef7f2324ed0849f0169d46e4507ec7e4cc1d3823cdd32f559c4c52a3",
+      "bytes": 406
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/geom/src/lib.rs",
+      "sha256": "a15190846433f731da692e0cfd3f4c0dd077a342b79bee10211c1b700b84d4b6",
+      "bytes": 12725
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/pathops/Cargo.toml",
+      "sha256": "c0e5bcdeea22bb243aa054d9d1a6c17cfad570785a35b946824b173c8472ea2d",
+      "bytes": 512
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/pathops/src/lib.rs",
+      "sha256": "1818c70287ec83af4fedc371ad6ec96d672ed2441c6926131d7a75e753b8a2fc",
+      "bytes": 2087
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/tools/Cargo.toml",
+      "sha256": "09cf8c96d2b8fa0cf14cd77c4524a9a18a117df874d4a4ee9f3e4530dd3c6fdf",
+      "bytes": 860
+    },
+    {
+      "path": "docs/research/vectorcraft/crates/tools/src/lib.rs",
+      "sha256": "e84b351f0b7580c6fa0f94c98db6fe9eb1a3335c2052533af06cb87de82d3027",
+      "bytes": 28072
+    },
+    {
+      "path": "docs/research/vectorcraft/docs/architecture.md",
+      "sha256": "4b853f7bd180fb68d8e5bd9322177f589f31e049747d12b8002877a552cd89f1",
+      "bytes": 7352
+    },
+    {
+      "path": "docs/research/vectorcraft/docs/development.md",
+      "sha256": "0b18c13d69e8fac99e277db785baeade0df055b36bba352d07eaa36b152133b2",
+      "bytes": 69140
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+node_modules/
+/dist/
+/output/
+/tmp/
+.vite/
+.DS_Store
+*.tsbuildinfo
+/public/fonts/*.ttf.gz
+/public/fonts/*.tmp
+.env
+.env.*
+!.env.example
+*.log
+*.pamph
+*.pamplib

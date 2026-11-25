@@ -1,0 +1,7 @@
+Pages: 12
+All A5: PASS
+Japanese text extraction: PASS
+Noto embedding: PASS
+Embedded PDF Form XObjects: 1
+Raster image XObjects: 0
+Fonts: /Helvetica-Bold, /NotoSansCJKjp-Bold-7279, /NotoSansCJKjp-Medium-7478

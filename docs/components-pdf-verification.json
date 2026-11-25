@@ -1,0 +1,35 @@
+[
+  {
+    "preset": "stripe",
+    "pages": 1,
+    "a5": true,
+    "searchableJapanese": true,
+    "embeddedFonts": {
+      "/NotoSansCJKjp-Bold-6917": true,
+      "/NotoSansCJKjp-Medium-4516": true
+    },
+    "rasterImages": 0
+  },
+  {
+    "preset": "cards",
+    "pages": 2,
+    "a5": true,
+    "searchableJapanese": true,
+    "embeddedFonts": {
+      "/NotoSansCJKjp-Bold-7966": true,
+      "/NotoSansCJKjp-Medium-58": true
+    },
+    "rasterImages": 0
+  },
+  {
+    "preset": "split",
+    "pages": 1,
+    "a5": true,
+    "searchableJapanese": true,
+    "embeddedFonts": {
+      "/NotoSansCJKjp-Bold-2514": true,
+      "/NotoSansCJKjp-Medium-4734": true
+    },
+    "rasterImages": 0
+  }
+]

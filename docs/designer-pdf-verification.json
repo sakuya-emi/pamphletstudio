@@ -1,0 +1,27 @@
+{
+  "pages": 2,
+  "sizes_mm": [
+    [
+      148.0,
+      210.0
+    ],
+    [
+      148.0,
+      210.0
+    ]
+  ],
+  "embedded_fonts": [
+    true,
+    true,
+    true
+  ],
+  "image_xobjects": 0,
+  "text_sample": "デザイナーモード検証\n文字・図形・パスはベクターのまま出力します。\n",
+  "pdf_operators": {
+    " cm": 14,
+    " c": 19,
+    " m": 4,
+    " Tj": 2,
+    " TJ": 0
+  }
+}
