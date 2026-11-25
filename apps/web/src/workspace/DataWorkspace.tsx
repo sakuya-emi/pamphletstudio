@@ -1,3 +1,4 @@
+import { mediaSummary } from "./workflow";
 import {
   isStage,
   adCompany,
@@ -183,22 +184,6 @@ export function DataWorkspace({
   }, [focusSource]);
   const commonSources = useMemo(
     () => [
-      ...["edition", "date", "time", "university", "festival", "tagline"].map(
-        (field) => ({
-          id: "project:" + field,
-          label: (
-            {
-              edition: "開催回数",
-              date: "開催日",
-              time: "開催時間",
-              university: "大学名",
-              festival: "学園祭名",
-              tagline: "テーマ",
-            } as Record<string, string>
-          )[field],
-          source: { type: "project", id: p.id, field } as DataSource,
-        }),
-      ),
       ...p.blocks.flatMap((b) => [
         {
           id: b.id + ":title",
@@ -382,11 +367,11 @@ export function DataWorkspace({
       }}
     >
       <div className="data-summary">
-        <strong>掲載情報</strong>
+        <strong>Excelを読み込む・取り込み済みの情報</strong>
         <span>企画 {p.events.length}件</span>
         <span>
-          ポスター {p.events.filter((e) => e.assetId).length}件 / 未登録{" "}
-          {p.events.filter((e) => !e.assetId).length}件
+          画像：合計{mediaSummary(p).total}件 ／ 未登録{mediaSummary(p).missing}
+          件<small>{mediaSummary(p).breakdown}</small>
         </span>
         <span>
           広告 {p.ads.filter((a) => a.published !== false).length}件 / 未配置{" "}
@@ -406,6 +391,14 @@ export function DataWorkspace({
           入稿エラー {layout.issues.filter((i) => i.level === "error").length}件
         </span>
       </div>
+      <p>
+        入力不足は、企画名・学生企画と模擬店の建物・ステージの開催時刻が不足または不正な企画の件数です。基本情報や画像の不足は含みません。
+      </p>
+      {sheet === "common" && (
+        <p>
+          開催回数・開催日・開催時間・大学名・学園祭名・テーマは、Excelの「基本情報」シートで管理しています。空欄でもPDF出力できます。
+        </p>
+      )}
       <nav className="data-tabs">
         {Object.entries(names).map(([k, v]) => (
           <button
@@ -428,7 +421,7 @@ export function DataWorkspace({
         {onImages && <button onClick={onImages}>画像を登録</button>}
         {onFinish && (
           <button className="primary" onClick={onFinish}>
-            誌面を確認する →
+            次へ（誌面を確認する） →
           </button>
         )}
 

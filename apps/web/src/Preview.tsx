@@ -127,7 +127,11 @@ export function Preview({
       className={thumb ? "page-svg thumbnail" : "page-svg"}
       viewBox={bounds?.join(" ") ?? "0 0 148 210"}
       role="img"
-      aria-label={`${page.title} PDF ${page.physical}ページ`}
+      aria-label={
+        thumb
+          ? `${page.title}のデザイン見本`
+          : `${page.title} PDF ${page.physical}ページ`
+      }
     >
       <rect x="0" y="0" width="148" height="210" fill="white" />
       {page.nodes

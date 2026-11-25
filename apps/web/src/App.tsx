@@ -1,3 +1,4 @@
+import { outputPages } from "./workspace/workflow";
 import { ExcelImport } from "./workspace/ExcelImport";
 import { MediaIntake } from "./workspace/MediaIntake";
 import {
@@ -16,7 +17,6 @@ import { findComponent } from "../../../packages/designer/components";
 import { pdfCompletion } from "../../../packages/core/pdf-completion";
 import { createFestivalSample } from "../../../packages/core/festival-sample";
 import { PageChoices, templateLabel } from "./workspace/TemplateChoices";
-import { festivalDate } from "../../../packages/core/festival-date";
 import { CommitField } from "./workspace/CommitField";
 import {
   backCoverLayouts,
@@ -109,7 +109,7 @@ import { Preview } from "./Preview";
 const productionSteps = [
   "デザインを選ぶ",
   "情報を入力",
-  "掲載情報の登録",
+  "Excelを読み込む",
   "誌面を確認・編集",
   "最終確認・PDF出力",
 ];
@@ -224,6 +224,21 @@ export function App() {
   const paddingCount = layout.pages.filter(
     (p) => p.automatic?.kind === "padding",
   ).length;
+  const [pageChange, setPageChange] = useState("");
+  const previousPages = useRef<{ id: string; count: number } | undefined>(
+    undefined,
+  );
+  const pageChangeReason = useRef("編集");
+  useEffect(() => {
+    const previous = previousPages.current;
+    if (previous?.id === project.id && previous.count !== layout.pages.length) {
+      const delta = layout.pages.length - previous.count;
+      setPageChange(
+        `${pageChangeReason.current}による掲載内容・改ページ・白紙調整の再計算で、出力ページ数が${previous.count}から${layout.pages.length}ページに変わりました（${delta > 0 ? "+" : ""}${delta}ページ）。${outputPages(layout.pages.length, paddingCount)}`,
+      );
+    } else if (previous?.id !== project.id) setPageChange("");
+    previousPages.current = { id: project.id, count: layout.pages.length };
+  }, [project.id, layout.pages.length, paddingCount]);
   const checks = layout.issues.filter((i) => i.level === "check");
   const pendingChecks = checks.filter(
     (i) => !project.manualChecks[i.checkId!],
@@ -235,7 +250,7 @@ export function App() {
     project.contentVersion ?? "initial",
     project.lastPdf?.contentVersion ?? null,
     !!errors.length,
-    pendingChecks === 0,
+    true,
   );
   async function refreshProjects() {
     const request = ++listRequest.current;
@@ -324,7 +339,12 @@ export function App() {
   useEffect(() => {
     setPdfSuccess(false);
   }, [home, designer, dataMode, step, sharedOpen]);
-  function update(fn: (p: Project) => void, affectsOutput = true) {
+  function update(
+    fn: (p: Project) => void,
+    affectsOutput = true,
+    reason = "編集",
+  ) {
+    pageChangeReason.current = reason;
     // The mutation may reject invalid input (e.g. a non-numeric floor).
     // Only create an undo entry after it succeeds; never commit half an edit.
     const previous = activeProject.current;
@@ -1282,7 +1302,7 @@ export function App() {
             }
           />
           <span>
-            {saveState} <i /> A5縦・{layout.pages.length}ページ
+            {saveState} <i /> A5縦・出力{layout.pages.length}ページ
           </span>
         </div>
         <div className="top-actions">
@@ -1321,6 +1341,11 @@ export function App() {
         </div>
       </header>
 
+      {pageChange && (
+        <p className="page-change" role="status">
+          {pageChange}
+        </p>
+      )}
       <div className="route-position">
         パンフレット制作 ›{" "}
         {step === 5
@@ -1336,20 +1361,17 @@ export function App() {
             const current =
               i === step || (i === 2 && (step === 1 || step === 5));
             const needsFix =
-              (i === 4 &&
-                (!!errors.length || finalStatus === "出力後に変更あり")) ||
-              (i === 2 && !!project.date.trim() && !festivalDate(project.date));
+              i === 4 &&
+              (!!errors.length || finalStatus === "出力後に変更あり");
             const complete = [
               designReady,
-              !!(
-                project.festival.trim() &&
-                festivalDate(project.date) &&
-                project.time.trim()
-              ),
-              project.events.length > 0 ||
+              false,
+              project.intake === "images" ||
+                project.intake === "done" ||
+                project.events.length > 0 ||
                 project.staff.length > 0 ||
                 project.ads.length > 0,
-              reviewed,
+              reviewed || finalStatus === "PDF生成済み",
               finalStatus === "PDF生成済み",
             ][i];
             return (
@@ -1446,6 +1468,10 @@ export function App() {
           <p className="task-kicker">
             デザイン {designStep + 1} / {designSteps.length}
           </p>
+          <p>
+            デザイン選択は全{designSteps.length}画面です：
+            {designSteps.join(" → ")}。標準の見本を確認して順に進めます。
+          </p>
           <h2>{designSteps[designStep]}</h2>
           {designStep === 0 ? (
             <PaletteControl
@@ -1512,24 +1538,6 @@ export function App() {
                 ? `次へ：${designSteps[designStep + 1]} →`
                 : "このデザインで進む →"}
             </button>
-            {designStep < designSteps.length - 1 && (
-              <button
-                className="primary"
-                onClick={() => {
-                  clearDesignPreview();
-                  setDesignReady(true);
-                  setStep(
-                    project.intake === "images"
-                      ? 5
-                      : project.intake === "done"
-                        ? 2
-                        : 1,
-                  );
-                }}
-              >
-                このデザインで進む
-              </button>
-            )}
           </div>
         </section>
       ) : step === 1 ? (
@@ -1537,10 +1545,14 @@ export function App() {
           inline
           project={project}
           update={(edit) =>
-            update((p) => {
-              edit(p);
-              p.intake = "images";
-            })
+            update(
+              (p) => {
+                edit(p);
+                p.intake = "images";
+              },
+              true,
+              "Excel取り込み",
+            )
           }
           close={() => setStep(0)}
           done={() => setStep(5)}
@@ -1573,11 +1585,7 @@ export function App() {
               {project.lastPdf.pages}ページ）
             </p>
           )}
-          <p>
-            {paddingCount
-              ? `現在${layout.pages.length - paddingCount}ページ → ${layout.pages.length}ページで出力（白紙${paddingCount}ページを自動追加）`
-              : `現在${layout.pages.length}ページ${project.theme.padding === 4 ? "（調整不要）" : layout.pages.length % 4 ? "（4の倍数ではありません）" : ""}`}
-          </p>
+          <p>{outputPages(layout.pages.length, paddingCount)}</p>
           <button
             onClick={() => {
               setTab("theme");
@@ -1588,18 +1596,14 @@ export function App() {
             総ページ数の設定
           </button>
           <p>
-            エラー {errors.length} 件・警告 {warnings.length} 件・未確認{" "}
-            {pendingChecks} / {checks.length} 件・情報 {infos.length} 件
+            エラー {errors.length} 件・警告 {warnings.length}{" "}
+            件・任意の校正チェック 未確認 {pendingChecks} / {checks.length}{" "}
+            件・情報 {infos.length} 件
           </p>
           <p>
-            不足している情報と印刷会社の条件を確認し、校正用PDFを書き出してください。
+            校正チェックは確認の記録用です。未確認や警告があっても校正用PDFを出力できます。エラーがある場合は修正してください。印刷会社の条件は別途確認してください。
           </p>
-          {!project.date.trim() && (
-            <p>
-              開催日が未設定です。
-              <button onClick={() => setStep(2)}>開催情報を修正</button>
-            </p>
-          )}
+
           <button
             className="primary"
             disabled={!fontsReady || !!busy || !!errors.length}
@@ -1757,6 +1761,7 @@ export function App() {
           </aside>
           <main className="canvas-panel">
             <div className="canvas-toolbar">
+              <p>{outputPages(layout.pages.length, paddingCount)}</p>
               <div className="segmented">
                 <button
                   aria-pressed={!hidePages}
@@ -1815,22 +1820,18 @@ export function App() {
               >
                 <CheckCheck size={16} />
                 最終確認へ
-                <span>{warnings.length}</span>
+                <span>警告{warnings.length}件</span>
               </button>
             </div>
             {!sampleSession.current &&
-              (!project.date.trim() ||
-                !project.time.trim() ||
-                (!project.events.length &&
-                  !project.staff.length &&
-                  !project.ads.length) ||
+              ((!project.events.length &&
+                !project.staff.length &&
+                !project.ads.length) ||
                 !project.coverId) && (
                 <div className="production-next-action">
-                  {!project.date.trim() || !project.time.trim() ? (
-                    <button onClick={() => setStep(2)}>開催情報を修正</button>
-                  ) : !project.events.length &&
-                    !project.staff.length &&
-                    !project.ads.length ? (
+                  {!project.events.length &&
+                  !project.staff.length &&
+                  !project.ads.length ? (
                     <button onClick={() => setStep(1)}>Excelを読み込む</button>
                   ) : (
                     <button
@@ -1962,11 +1963,17 @@ export function App() {
                 <ChevronLeft size={18} />
               </button>
               <span>
-                PDF内の{index + 1}ページ目 / 全{layout.pages.length}ページ
-                <small>
-                  {page.side === "left" ? "左ページ" : "右ページ"}{" "}
-                  {page.number ? `・誌面番号 ${page.number}` : ""}
-                </small>
+                PDF {index + 1}ページ目 ／ 出力全{layout.pages.length}ページ
+                <small>{page.side === "left" ? "左ページ" : "右ページ"}</small>
+                <details>
+                  <summary>紙面に印刷される番号について</summary>
+                  <p>
+                    {page.number
+                      ? `誌面番号は${page.number}です。`
+                      : "このページに誌面番号は印刷されません。"}
+                    表紙などを数えるPDFの位置とは異なります。
+                  </p>
+                </details>
               </span>
               <button
                 className="icon"
@@ -2003,6 +2010,17 @@ export function App() {
               ))}
             </div>
             <div className="inspector-body">
+              <p className="hint">
+                {
+                  {
+                    page: "ページ：選択した誌面の画像・文章・レイアウトを編集します。",
+                    events: "企画：掲載する企画の内容と画像を編集します。",
+                    ads: "広告：協賛広告の画像と掲載枠を設定します。",
+                    theme:
+                      "デザイン：冊子全体の配色・番号・白紙調整を設定します。",
+                  }[tab]
+                }
+              </p>
               {inputTarget && (
                 <ProductionEditor
                   key={JSON.stringify(inputTarget)}

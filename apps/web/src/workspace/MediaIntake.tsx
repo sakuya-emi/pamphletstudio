@@ -1,10 +1,6 @@
 import { useRef, useState } from "react";
 import type { Project } from "../../../../packages/core/model";
-import {
-  adCompany,
-  categoryNames,
-  eventCategory,
-} from "../../../../packages/core/registration";
+import { mediaItems, mediaSummary } from "./workflow";
 import { importAsset } from "../assets";
 
 export function MediaIntake({
@@ -16,36 +12,9 @@ export function MediaIntake({
   update: (edit: (project: Project) => void) => void;
   onFinish: () => void;
 }) {
-  const items = [
-    ...project.events
-      .filter((e) => e.published !== false)
-      .map((event) => ({
-        collection: "events" as const,
-        id: event.id,
-        title: event.name,
-        label: eventCategory(event) === "kitchen" ? "店舗画像" : "ポスター",
-        detail: [
-          categoryNames[eventCategory(event)],
-          event.group,
-          event.location,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-        assetId: event.assetId,
-      })),
-    ...project.ads
-      .filter((ad) => ad.published !== false)
-      .map((ad) => ({
-        collection: "ads" as const,
-        id: ad.id,
-        title: adCompany(project, ad.id),
-        label: "広告画像",
-        detail: { full: "1ページ", half: "1/2ページ", quarter: "1/4ページ" }[
-          ad.size
-        ],
-        assetId: ad.assetId,
-      })),
-  ];
+  const items = mediaItems(project);
+  const summary = mediaSummary(project);
+  const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(() => {
     const first = items.findIndex(
       (item) => !item.assetId || !project.assets[item.assetId],
@@ -68,12 +37,15 @@ export function MediaIntake({
       const { asset, warning } = await importAsset(selected);
       update((p) => {
         if (p.id !== project.id) throw new Error("冊子が切り替わりました。");
-        const record = p[item.collection].find(
-          (record) => record.id === item.id,
-        );
-        if (!record) throw new Error("掲載先が見つかりません。");
         p.assets[asset.id] = asset;
-        record.assetId = asset.id;
+        if (item.collection === "cover") p.coverId = asset.id;
+        else {
+          const record = p[item.collection].find(
+            (record) => record.id === item.id,
+          );
+          if (!record) throw new Error("掲載先が見つかりません。");
+          record.assetId = asset.id;
+        }
       });
       setMessage(warning ?? "");
     } catch (error) {
@@ -86,6 +58,29 @@ export function MediaIntake({
     setIndex(to);
     setMessage("");
   }
+  if (!started)
+    return (
+      <section className="task-screen">
+        <h2>表紙・ポスター・広告画像を登録する</h2>
+        {project.intake === "images" && (
+          <p>Excelの取り込みが完了しました。次に画像を登録します。</p>
+        )}
+        <p>{summary.breakdown}</p>
+        <p>
+          合計{summary.total}件 ／ 未登録{summary.missing}
+          件。表紙から順に登録します。画像はあとから追加できます。
+        </p>
+        <button className="primary" onClick={() => setStarted(true)}>
+          画像の登録を始める
+        </button>
+        <button onClick={onFinish}>すべてあとで登録する（一括スキップ）</button>
+        {!project.assets[project.coverId ?? ""] && (
+          <p>
+            表紙未登録のままでも校正用PDFは出力できます。最終確認に警告が残ります。
+          </p>
+        )}
+      </section>
+    );
   if (!item)
     return (
       <section className="task-screen" aria-labelledby="media-finish">
@@ -130,6 +125,9 @@ export function MediaIntake({
         {item.title || "名称未入力"}
       </h2>
       <p>{item.detail}</p>
+      <p>
+        {summary.breakdown} ／ 合計{summary.total}件・未登録{summary.missing}件
+      </p>
       <div
         className="task-upload"
         onDragOver={(e) => e.preventDefault()}
@@ -170,6 +168,20 @@ export function MediaIntake({
       </div>
       {message && <p role="status">{message}</p>}
       <div className="button-row">
+        <button disabled={busy} onClick={onFinish}>
+          すべてあとで登録する（一括スキップ）
+        </button>
+        <button
+          disabled={busy}
+          onClick={() => {
+            const next = items.findIndex(
+              (candidate, i) => i > index && candidate.label !== item.label,
+            );
+            move(next < 0 ? items.length : next);
+          }}
+        >
+          この種類の残りをあとで登録する
+        </button>
         {index > 0 && (
           <button disabled={busy} onClick={() => move(index - 1)}>
             前の画像

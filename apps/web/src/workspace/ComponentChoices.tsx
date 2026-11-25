@@ -430,6 +430,11 @@ export function ComponentChoices({
           (allowGlobal ? activeBuiltin?.label : undefined) ??
           standardName}
       </p>
+      {fixedCategory && (
+        <p>
+          カードは各部品のデザイン見本です。冊子全体の出力ページ数は画面上部で確認できます。
+        </p>
+      )}
       {libraryError && <p role="alert">{libraryError}</p>}
       {!fixedCategory && (
         <label>

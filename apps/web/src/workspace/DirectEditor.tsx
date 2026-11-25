@@ -1,3 +1,4 @@
+import { excelManaged } from "./workflow";
 import { useState } from "react";
 import type { Project } from "../../../../packages/core/model";
 import { readSource, type DataSource } from "../../../../packages/core/editing";
@@ -17,16 +18,26 @@ export function DirectEditor({
   onAsset?: (s: DataSource, f: File) => Promise<void>;
 }) {
   const [error, setError] = useState("");
+  if (excelManaged(source))
+    return (
+      <div className="direct-editor">
+        <p>
+          Excelの「基本情報」シートで管理しています。変更はExcelを再取り込みしてください。
+        </p>
+        <button onClick={onClose}>閉じる</button>
+      </div>
+    );
   const composite = ["place", "placeShort"].includes(source.field);
-  const festival = source.type === "project" && source.field === "festivalDisplay";
+  const festival =
+    source.type === "project" && source.field === "festivalDisplay";
   const timeRange = source.type === "event" && source.field === "timeRange";
   const fields = timeRange
     ? ["startTime", "endTime"]
     : festival
-    ? ["edition", "festival"]
-    : composite
-      ? ["building", "floor", "room", "location"]
-      : [source.field];
+      ? ["edition", "festival"]
+      : composite
+        ? ["building", "floor", "room", "location"]
+        : [source.field];
   return (
     <div className="direct-editor" onClick={(e) => e.stopPropagation()}>
       <strong>
@@ -39,8 +50,8 @@ export function DirectEditor({
               : timeRange
                 ? "開催時刻"
                 : source.field === "assetId"
-              ? "画像の差し替え"
-              : "登録内容の編集"}
+                  ? "画像の差し替え"
+                  : "登録内容の編集"}
       </strong>
       {source.field === "assetId" ? (
         <input
@@ -65,10 +76,12 @@ export function DirectEditor({
             try {
               const data = new FormData(e.currentTarget);
               const changes = fields.map((field) => ({
-                source: { ...source, field }, value: String(data.get(field) || ""),
+                source: { ...source, field },
+                value: String(data.get(field) || ""),
               }));
               if (onEditMany) onEditMany(changes);
-              else changes.forEach(({ source, value }) => onEdit(source, value));
+              else
+                changes.forEach(({ source, value }) => onEdit(source, value));
               onClose();
             } catch (e) {
               setError(String(e));

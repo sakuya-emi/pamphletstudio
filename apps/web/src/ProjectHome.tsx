@@ -1,3 +1,4 @@
+import { uniqueProjectName } from "./workspace/workflow";
 import { useEffect, useRef, useState } from "react";
 import { Plus, FolderOpen, FilePlus } from "lucide-react";
 import type { Project } from "../../../packages/core/model";
@@ -101,12 +102,12 @@ export function ProjectHome({
         <div>
           <button onClick={() => files.current?.click()}>
             <FolderOpen size={16} />
-            保存したプロジェクトを読み込む
+            保存ファイル（.pamph）を選んで読み込む
           </button>
           <button onClick={onSample}>完成イメージを試す（見本）</button>
           <button onClick={() => folder.current?.click()}>
             <FolderOpen size={16} />
-            フォルダから追加
+            フォルダ内の保存ファイル（.pamph）をまとめて読み込む
           </button>
         </div>
       </div>
@@ -151,7 +152,7 @@ export function ProjectHome({
       <div className="project-columns">
         <button
           className="project-new"
-          onClick={() => setNewName("稲友祭パンフレット")}
+          onClick={() => setNewName(uniqueProjectName(projects))}
         >
           <span className="project-new-icon">
             <Plus size={42} strokeWidth={1} />
@@ -167,7 +168,18 @@ export function ProjectHome({
             >
               <Cover project={p} measure={measure} />
               <strong>{p.name}</strong>
-              <span>{p.year}年度</span>
+              <span>
+                {p.year}年度 · 出力{layoutProject(p, measure).pages.length}
+                ページ
+              </span>
+              <span>
+                {p.lastPdf
+                  ? p.lastPdf.contentVersion === (p.contentVersion ?? "initial")
+                    ? "PDF生成済み"
+                    : "出力後に変更あり"
+                  : "PDF未出力"}{" "}
+                · 企画{p.events.length}件 · 管理ID {p.id}
+              </span>
               <time>{new Date(p.updatedAt).toLocaleString("ja-JP")}</time>
             </button>
             <button className="project-copy" onClick={() => onNextYear(p)}>
@@ -216,7 +228,7 @@ export function ProjectHome({
             </label>
             {projects.some((p) => p.name === newName.trim()) && (
               <p role="status">
-                同名のプロジェクトがあります。作成しても上書きされません。一覧では年度と更新日時で区別できます。
+                同名のプロジェクトがあります。作成しても上書きされません。一覧では年度・ページ数・PDF出力状態・管理IDで区別できます。
               </p>
             )}
             <button type="button" onClick={() => setNewName(null)}>

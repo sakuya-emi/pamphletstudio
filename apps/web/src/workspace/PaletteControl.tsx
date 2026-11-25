@@ -29,8 +29,8 @@ export function PaletteControl({
       ? { ...project, colorPaletteId: pending || undefined }
       : undefined;
   const previewPage =
-    preview &&
-    layoutProject(preview, measure).pages.find(
+    confirmSelection &&
+    layoutProject(preview ?? project, measure).pages.find(
       (page) => page.template === "events",
     );
   const labels: Record<string, string> = {
@@ -70,6 +70,14 @@ export function PaletteControl({
           ))}
         </select>
       </label>
+      {confirmSelection && !project.colorPalettes?.length && (
+        <p>現在の配色は標準のみです。</p>
+      )}
+      {confirmSelection && previewPage && !preview && (
+        <div className="apply-preview">
+          <Preview project={project} page={previewPage} thumb />
+        </div>
+      )}
       {confirmSelection && (
         <p>
           編集対象・適用対象：冊子全体の配色

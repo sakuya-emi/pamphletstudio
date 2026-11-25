@@ -266,3 +266,28 @@ foreignObject .direct-editor input {
 .book-palette-colors input[type=color] {margin-left:auto;width:42px;min-width:42px;height:28px;padding:2px}
 
 .book-palette-color input[type=text] {width:75px;padding:4px;flex-shrink:0}
+
+.excel-dropzone {
+  display: block;
+  width: 100%;
+  min-height: 160px;
+  border: 2px dashed var(--accent, #7b90ff);
+  border-radius: 12px;
+  padding: 2.5rem 1.5rem;
+  margin: 1rem 0;
+  text-align: center;
+  background: #8090ff12;
+}
+.excel-dropzone:focus-within {
+  outline: 2px solid #7b90ff;
+}
+.page-change {
+  padding: 0.75rem 1rem;
+  margin: 0;
+  background: #8090ff18;
+}
+.data-summary small {
+  display: block;
+}
+
+.excel-drop-hint { display: block; margin-top: .75rem; font-size: .875rem; }

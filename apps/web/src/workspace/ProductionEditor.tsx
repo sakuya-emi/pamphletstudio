@@ -1,3 +1,4 @@
+import { excelManaged } from "./workflow";
 import { CommitField } from "./CommitField";
 import { useState } from "react";
 import { insertBlock, type Project } from "../../../../packages/core/model";
@@ -309,11 +310,10 @@ export function ProductionEditor({
                 "backMapId",
               ].includes(s.field) ? (
               upload()
-            ) : s.type === "project" && s.field === "festivalDisplay" ? (
-              <>
-                {input("edition", "開催回数", "number")}
-                {input("festival", "学園祭名")}
-              </>
+            ) : excelManaged(s) ? (
+              <p>
+                Excelの「基本情報」シートで管理しています。変更はExcelを再取り込みしてください。
+              </p>
             ) : s.field === "websiteUrl" ? (
               input("websiteUrl", "大学ウェブサイトのURL", "url")
             ) : s.field === "surveyUrl" ? (

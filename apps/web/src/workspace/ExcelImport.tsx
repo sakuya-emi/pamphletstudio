@@ -292,12 +292,40 @@ export function ExcelImport({
       setError(String(e));
     }
   }
+  async function readFile(selected?: File) {
+    if (!selected || loading) return;
+    if (!/\.xlsx$/i.test(selected.name)) {
+      setError("Excelファイル（.xlsx）を選んでください。");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const workbook = await (await import("./xlsx")).readWorkbook(selected);
+      setIgnored(
+        workbook
+          .filter((s) => !Object.hasOwn(sheets, s.name))
+          .map((s) => s.name),
+      );
+      load(
+        workbook.flatMap((s) =>
+          Object.hasOwn(sheets, s.name)
+            ? interpretRows(s.name as ImportSheet, s.rows, true)
+            : [],
+        ),
+      );
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
   const content = (
     <>
       {inline ? (
         <>
           <p className="task-kicker">掲載情報</p>
-          <h2>{rows.length ? "登録内容を確認する" : "Excelを読み込む"}</h2>
+          <h2>Excelを読み込む</h2>
         </>
       ) : (
         <h2>Excelから登録</h2>
@@ -306,46 +334,47 @@ export function ExcelImport({
         <p>掲載情報が入ったExcelファイル（.xlsx）を選んでください。</p>
       )}
       <button
-        className={!rows.length ? "primary" : undefined}
+        type="button"
+        className="excel-dropzone"
+        aria-label="Excelファイルをドロップまたは選択"
+        aria-busy={loading}
         disabled={loading}
         onClick={() => file.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          if (e.dataTransfer.files.length !== 1) {
+            setError("Excelファイルを1つずつドロップしてください。");
+            return;
+          }
+          void readFile(e.dataTransfer.files[0]);
+        }}
       >
-        {rows.length ? "別のExcelを選ぶ" : "Excelファイルを選ぶ"}
+        {loading ? "Excelを読み込み中…" : "ここにExcel（.xlsx）をドロップ"}
+        <span className="excel-drop-hint">
+          {rows.length
+            ? "クリックで別のExcelを選ぶ"
+            : "またはクリックしてファイルを選ぶ"}
+        </span>
       </button>
       <input
         hidden
         ref={file}
         type="file"
         accept=".xlsx"
-        onChange={async (e) => {
-          const selected = e.target.files?.[0];
-          e.target.value = "";
-          if (!selected) return;
-          setLoading(true);
-          setError("");
-          try {
-            const workbook = await (
-              await import("./xlsx")
-            ).readWorkbook(selected);
-            setIgnored(
-              workbook
-                .filter((s) => !Object.hasOwn(sheets, s.name))
-                .map((s) => s.name),
-            );
-            load(
-              workbook.flatMap((s) =>
-                Object.hasOwn(sheets, s.name)
-                  ? interpretRows(s.name as ImportSheet, s.rows, true)
-                  : [],
-              ),
-            );
-          } catch (e) {
-            setError(String(e));
-          } finally {
-            setLoading(false);
-          }
+        onChange={(e) => {
+          void readFile(e.currentTarget.files?.[0]);
+          e.currentTarget.value = "";
         }}
       />
+      {decisions.some((d) => d.state === "review") && (
+        <p role="status">
+          「要確認」は既存の文章との違いや重複候補など、自動で登録先を決められない行です。各行の「変更前と変更後」を確認し、登録方法から「更新」または「新規追加」を選ぶと取り込まれます。「登録しない」を選ぶか要確認のままにした行は取り込みません。
+        </p>
+      )}
       {ignored.length > 0 && <p>対象外のシート：{ignored.join("、")}</p>}
       {rows.some((r) => r.sample) && (
         <p>

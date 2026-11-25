@@ -86,8 +86,8 @@ it("標準表紙は画像のみ、裏表紙の大学名は基本情報に連動�
       ?.nodes.some((n) => n.kind === "text" && n.text === p.university),
   ).toBe(true);
 });
-it("PDF完成は必要な確認と生成した版で判定する", () => {
-  expect(pdfCompletion(1, null, false, false)).toBe("確認が必要");
+it("PDF完成は任意チェックや画面移動に依存せずエラーと生成した版で判定する", () => {
+  expect(pdfCompletion(1, null, false, false)).toBe("PDF出力可能");
   expect(pdfCompletion(1, null, false, true)).toBe("PDF出力可能");
   expect(pdfCompletion(1, 1, false, true)).toBe("PDF生成済み");
   expect(pdfCompletion(2, 1, false, true)).toBe("出力後に変更あり");
