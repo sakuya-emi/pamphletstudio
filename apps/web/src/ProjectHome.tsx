@@ -1,3 +1,4 @@
+import type { UnreadableProject } from "../../../packages/project-storage";
 import { uniqueProjectName } from "./workspace/workflow";
 import { useEffect, useRef, useState } from "react";
 import { Plus, FolderOpen, FilePlus } from "lucide-react";
@@ -63,6 +64,8 @@ function Cover({ project, measure }: { project: Project; measure: Measure }) {
 }
 export function ProjectHome({
   projects,
+  unreadable = [],
+  onRemoveUnreadable,
   listState,
   onRetry,
   measure,
@@ -76,6 +79,8 @@ export function ProjectHome({
   onBackup,
 }: {
   projects: Project[];
+  unreadable?: UnreadableProject[];
+  onRemoveUnreadable?: (id: string) => Promise<void>;
   measure: Measure;
   onNew: (name: string) => void;
   listState: "loading" | "ready" | "error";
@@ -89,6 +94,7 @@ export function ProjectHome({
   onBackup: (p: Project) => Promise<void>;
 }) {
   const [newName, setNewName] = useState<string | null>(null);
+  const [damaged, setDamaged] = useState<UnreadableProject | null>(null);
   const [deleting, setDeleting] = useState<Project | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -143,6 +149,66 @@ export function ProjectHome({
           保存済みプロジェクトの一部または全部を読み込めませんでした。保存データは削除していません。{" "}
           <button onClick={onRetry}>再試行</button>
         </p>
+      )}
+      {unreadable.length > 0 && (
+        <section aria-label="読み込めない保存データ">
+          <h2>読み込めない保存データ（{unreadable.length}件）</h2>
+          <p>
+            正常なプロジェクトは下に表示しています。各データの名前・管理ID・理由を確認してください。削除するまで元のデータは保持します。
+          </p>
+          {unreadable.map((entry) => (
+            <article key={entry.id}>
+              <strong>{entry.name}</strong>
+              <p>
+                管理ID：{entry.id} ／ {entry.reason}
+              </p>
+              <button
+                onClick={() => {
+                  setError("");
+                  setDamaged(entry);
+                }}
+              >
+                この読めないデータを削除…
+              </button>
+            </article>
+          ))}
+        </section>
+      )}
+      {damaged && (
+        <div className="modal-backdrop">
+          <section
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="読めないデータの削除確認"
+          >
+            <h2>「{damaged.name}」だけを削除しますか？</h2>
+            <p>
+              管理ID：{damaged.id}
+              。このブラウザの該当保存データを削除します。取り消せません。他のプロジェクトは削除しません。
+            </p>
+            <button disabled={busy} onClick={() => setDamaged(null)}>
+              キャンセル
+            </button>
+            <button
+              disabled={busy || !onRemoveUnreadable}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onRemoveUnreadable?.(damaged.id);
+                  setDamaged(null);
+                } catch (e) {
+                  setError(String(e));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              このデータだけを削除
+            </button>
+            {error && <p role="alert">{error}</p>}
+          </section>
+        </div>
       )}
       {listState === "ready" && !projects.length && (
         <p className="project-browser-note">

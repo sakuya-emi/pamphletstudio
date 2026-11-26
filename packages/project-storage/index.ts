@@ -4,12 +4,19 @@ import { validateDesign } from "../designer/model";
 import JSZip from "jszip";
 import { get, set, keys, del } from "idb-keyval";
 import { createProject, type Project, type Asset } from "../core/model";
+export interface UnreadableProject {
+  id: string;
+  name: string;
+  reason: string;
+}
 export interface ProjectStorage {
   remove(id: string): Promise<void>;
   save(p: Project): Promise<Blob>;
   load(file: Blob): Promise<{ project: Project; warnings: string[] }>;
   autosave(p: Project): Promise<void>;
-  recent(onUnreadable?: (count: number) => void): Promise<Project[]>;
+  recent(
+    onUnreadable?: (count: number, entries: UnreadableProject[]) => void,
+  ): Promise<Project[]>;
 }
 const maxFile = 300 * 1024 * 1024;
 export function validateProject(raw: unknown): Project {
@@ -221,6 +228,13 @@ export function validateProject(raw: unknown): Project {
     "updatedAt",
   ] as const)
     if (typeof p[key] !== "string") throw new Error("基本情報が不正です。");
+  // Older editors stored an explicitly cleared edition as undefined/null/empty.
+  if (
+    p.edition === undefined ||
+    p.edition === null ||
+    (p.edition as unknown) === ""
+  )
+    p.edition = 0;
   if (!Number.isFinite(p.edition) || !Number.isFinite(p.year))
     throw new Error("年度・開催回数が不正です。");
   for (const a of p.ads)
@@ -355,11 +369,17 @@ export function validateProject(raw: unknown): Project {
   } else if (p.date === "開催日を入力") p.date = "";
   return p;
 }
+export function prepareProjectForSave(project: Project): Project {
+  const normalized = validateProject(project);
+  // Match the .pamph JSON representation before writing either storage format.
+  return validateProject(JSON.parse(JSON.stringify(normalized)));
+}
 export const webStorage: ProjectStorage = {
   async remove(id) {
     await del(`pamph:${id}`);
   },
   async save(p) {
+    p = prepareProjectForSave(p);
     const zip = new JSZip(),
       manifest = structuredClone(p);
     for (const a of Object.values(manifest.assets)) {
@@ -424,19 +444,38 @@ export const webStorage: ProjectStorage = {
     return { project: p, warnings };
   },
   async autosave(p) {
-    await set(`pamph:${p.id}`, { ...p, updatedAt: new Date().toISOString() });
+    const valid = prepareProjectForSave(p);
+    await set(`pamph:${valid.id}`, {
+      ...valid,
+      updatedAt: new Date().toISOString(),
+    });
   },
   async recent(onUnreadable) {
     const ids = (await keys()).filter((k) => String(k).startsWith("pamph:"));
-    let unreadable = 0;
+    const unreadable: UnreadableProject[] = [];
     const projects = (
       await Promise.all(
         ids.map(async (id) => {
+          let raw: unknown;
           try {
-            const raw = await get<Project>(id);
-            return raw ? validateProject(raw) : undefined;
-          } catch {
-            unreadable++;
+            raw = await get(id);
+            const project = validateProject(raw);
+            if (`pamph:${project.id}` !== String(id))
+              throw new Error("保存キーとプロジェクトIDが一致しません。");
+            return project;
+          } catch (error) {
+            const name =
+              raw &&
+              typeof raw === "object" &&
+              "name" in raw &&
+              typeof raw.name === "string"
+                ? raw.name
+                : "名称不明の保存データ";
+            unreadable.push({
+              id: String(id).slice(6),
+              name,
+              reason: error instanceof Error ? error.message : String(error),
+            });
             return undefined;
           }
         }),
@@ -444,7 +483,7 @@ export const webStorage: ProjectStorage = {
     )
       .filter((p): p is Project => !!p)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-    onUnreadable?.(unreadable);
+    onUnreadable?.(unreadable.length, unreadable);
     return projects;
   },
 };

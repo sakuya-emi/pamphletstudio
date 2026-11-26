@@ -83,7 +83,8 @@ export function writeSource(p: Project, s: DataSource, value: string) {
   if (["floor", "order", "grade", "edition", "year"].includes(s.field)) {
     if (value !== "" && !Number.isFinite(Number(value)))
       throw new Error("数値を入力してください。");
-    r[s.field] = value === "" ? undefined : Number(value);
+    r[s.field] =
+      value === "" ? (s.field === "edition" ? 0 : undefined) : Number(value);
   } else if (["published", "visible"].includes(s.field))
     r[s.field] = !["false", "0", "非掲載", "非表示"].includes(value);
   else r[s.field] = value;

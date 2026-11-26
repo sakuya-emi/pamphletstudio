@@ -103,7 +103,11 @@ import {
   type Measure,
 } from "../../../packages/layout-engine";
 
-import { webStorage, download } from "../../../packages/project-storage";
+import {
+  type UnreadableProject,
+  webStorage,
+  download,
+} from "../../../packages/project-storage";
 import { importAsset } from "./assets";
 import { Preview } from "./Preview";
 const productionSteps = [
@@ -132,6 +136,9 @@ export function App() {
     "loading",
   );
   const listRequest = useRef(0);
+  const [unreadableProjects, setUnreadableProjects] = useState<
+    UnreadableProject[]
+  >([]);
   const [fitMode, setFitMode] = useState<"page" | "width">("page");
   const [hidePages, setHidePages] = useState(true);
   const [hideInspector, setHideInspector] = useState(true);
@@ -256,21 +263,14 @@ export function App() {
     const request = ++listRequest.current;
     setListState("loading");
     try {
-      let unreadable = 0;
-      const items = await webStorage.recent((n) => {
-        unreadable = n;
+      let unreadable: UnreadableProject[] = [];
+      const items = await webStorage.recent((_, entries) => {
+        unreadable = entries;
       });
       if (request !== listRequest.current) return;
-      if (unreadable) {
-        setRecent((previous) => [
-          ...items,
-          ...previous.filter((p) => !items.some((item) => item.id === p.id)),
-        ]);
-        setListState("error");
-      } else {
-        setRecent(items);
-        setListState("ready");
-      }
+      setRecent(items);
+      setUnreadableProjects(unreadable);
+      setListState(unreadable.length ? "error" : "ready");
     } catch {
       if (request === listRequest.current) setListState("error");
     }
@@ -783,6 +783,11 @@ export function App() {
         ) : (
           <ProjectHome
             projects={recent}
+            unreadable={unreadableProjects}
+            onRemoveUnreadable={async (id) => {
+              await webStorage.remove(id);
+              await refreshProjects();
+            }}
             measure={measure}
             listState={listState}
             onRetry={refreshProjects}
