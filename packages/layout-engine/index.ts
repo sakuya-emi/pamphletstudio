@@ -1,3 +1,4 @@
+import { adCompany } from "../core/registration";
 import { resolveAsset } from "../core/rule-marks";
 import { recolorNodes } from "../core/color-palette";
 import { openingPage, orderedSchedule, surveyQr } from "../templates/opening";
@@ -428,8 +429,8 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
           issues.push({
             level: "warning",
             message: ad
-              ? "広告素材が未登録です。"
-              : "広告未設定の枠があります。",
+              ? `広告素材が未登録です：${adCompany(p, ad.id) || "名称未設定"} ／ ${block.title}（枠${j + 1}）`
+              : `広告未設定の枠があります：${block.title}（${i + 1}ページ目・枠${j + 1}）`,
             pageId: id,
           });
         }

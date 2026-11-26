@@ -1,4 +1,4 @@
-import { outputPages } from "./workspace/workflow";
+import { outputPages, automaticBlankCounts } from "./workspace/workflow";
 import { ExcelImport } from "./workspace/ExcelImport";
 import { MediaIntake } from "./workspace/MediaIntake";
 import {
@@ -228,9 +228,8 @@ export function App() {
       layout.pages
         .slice(spreadStart, spreadStart + (index <= 0 ? 1 : 2))
         .some((p) => p.automatic));
-  const paddingCount = layout.pages.filter(
-    (p) => p.automatic?.kind === "padding",
-  ).length;
+  const blankCounts = automaticBlankCounts(layout.pages);
+  const paddingCount = blankCounts.total;
   const [pageChange, setPageChange] = useState("");
   const previousPages = useRef<{ id: string; count: number } | undefined>(
     undefined,
@@ -511,6 +510,9 @@ export function App() {
     update((p) => {
       p.pageOrder = order;
     });
+    setNotice(
+      "ページを移動しました。左右の配置と目次のページ番号を再計算しました。",
+    );
   }
   function pdf(source: Project = activeProject.current) {
     if (pdfRunning.current) return;
@@ -1430,6 +1432,11 @@ export function App() {
           })}
         </nav>
       }
+      {intakePending(project) && (
+        <p className="hint">
+          Excelを取り込み、画像登録を完了または一括スキップすると、誌面の確認とPDF出力に進めます。
+        </p>
+      )}
       {dataMode || step === 2 ? (
         <DataWorkspace
           project={project}
@@ -1474,8 +1481,8 @@ export function App() {
             デザイン {designStep + 1} / {designSteps.length}
           </p>
           <p>
-            デザイン選択は全{designSteps.length}画面です：
-            {designSteps.join(" → ")}。標準の見本を確認して順に進めます。
+            全{designSteps.length}画面：
+            {designSteps.join(" → ")}。見本を確認して進みます。
           </p>
           <h2>{designSteps[designStep]}</h2>
           {designStep === 0 ? (
@@ -1578,6 +1585,9 @@ export function App() {
       ) : step === 4 ? (
         <section className="production-guide">
           <h2>{productionSteps[step]}</h2>
+          <p>
+            手順の「完了」は作業を進めた記録です。校正チェックの確認済みとは別です。「PDF生成済み」は現在の内容でPDFを出力したことを示します。
+          </p>
           <p role="status">
             <strong>{finalStatus}</strong>
             {finalStatus === "出力後に変更あり" &&
@@ -1591,6 +1601,11 @@ export function App() {
             </p>
           )}
           <p>{outputPages(layout.pages.length, paddingCount)}</p>
+          <p>
+            自動白紙の内訳：章・ページ・見開きの開始位置を揃える白紙
+            {blankCounts.start}ページ、総ページ数を整える白紙
+            {blankCounts.padding}ページ。どちらも自動白紙に数えています。
+          </p>
           <button
             onClick={() => {
               setTab("theme");
@@ -1726,6 +1741,7 @@ export function App() {
                 <button
                   key={pg.id}
                   className={`page-item ${pg.id === page.id ? "selected" : ""}`}
+                  title="つかんで移動：左右配置と目次番号は自動で再計算します"
                   draggable={pg.template !== "blank"}
                   onDragStart={() => setDragged(pg.id)}
                   onDragOver={(e) => e.preventDefault()}
@@ -1744,7 +1760,7 @@ export function App() {
                     <span>{i + 1}</span>
                   </div>
                   <div>
-                    <b>{pg.title}</b>
+                    <b>⠿ {pg.title}</b>
                     <small>
                       {pg.number ? `誌面番号 ${pg.number}` : "誌面番号なし"} ·{" "}
                       {pg.side === "left" ? "左" : "右"}
@@ -2735,7 +2751,7 @@ export function App() {
                       <span className="badge">{project.events.length}</span>
                     </h2>
                     <p className="hint">
-                      一度の登録で、一覧表と紹介ページに反映されます。
+                      一度の登録で、一覧表と紹介ページに反映されます。企画の独立した本文欄はありません。お知らせ・挨拶の文章は「共通情報・文章」で編集します。
                     </p>
                     <div className="button-row">
                       <button onClick={() => setStep(5)}>
@@ -2743,6 +2759,14 @@ export function App() {
                         一括登録
                       </button>
                     </div>
+                    <button
+                      onClick={() => {
+                        setDataMode(true);
+                        setStep(2);
+                      }}
+                    >
+                      掲載情報・文章の編集へ
+                    </button>
                     <div className="record-list">
                       {project.events.map((e) => (
                         <button
@@ -2975,6 +2999,98 @@ export function App() {
                                     id;
                                 },
                               )}
+                              <Field label="広告の配置先">
+                                <select
+                                  aria-label={
+                                    "広告の配置先 " +
+                                    (s.name || "名称未設定") +
+                                    " " +
+                                    ad.id
+                                  }
+                                  value={
+                                    layout.pages
+                                      .flatMap((pg) => pg.slots)
+                                      .find((slot) => slot.adId === ad.id)
+                                      ?.key ?? ""
+                                  }
+                                  onChange={(e) => {
+                                    const key = e.target.value;
+                                    if (!key) return;
+                                    update((p) => {
+                                      for (const previous of Object.keys(
+                                        p.assignments,
+                                      ))
+                                        if (p.assignments[previous] === ad.id)
+                                          delete p.assignments[previous];
+                                      p.assignments[key] = ad.id;
+                                    });
+                                  }}
+                                >
+                                  <option value="">配置先を選ぶ</option>
+                                  {layout.pages.flatMap((pg) =>
+                                    pg.slots
+                                      .filter((slot) => slot.size === ad.size)
+                                      .map((slot, i) => (
+                                        <option
+                                          key={slot.key}
+                                          value={slot.key}
+                                          disabled={
+                                            !!slot.adId && slot.adId !== ad.id
+                                          }
+                                        >
+                                          PDF {pg.physical}ページ：{pg.title} ／
+                                          枠{i + 1}
+                                          {slot.adId && slot.adId !== ad.id
+                                            ? "（使用中）"
+                                            : ""}
+                                        </option>
+                                      )),
+                                  )}
+                                </select>
+                              </Field>
+                              <button
+                                onClick={() => {
+                                  const pg =
+                                    layout.pages.find((pg) =>
+                                      pg.slots.some(
+                                        (slot) => slot.adId === ad.id,
+                                      ),
+                                    ) ??
+                                    layout.pages.find((pg) =>
+                                      pg.slots.some(
+                                        (slot) =>
+                                          slot.size === ad.size && !slot.adId,
+                                      ),
+                                    );
+                                  if (pg) {
+                                    setSelected(pg.id);
+                                    setTab("page");
+                                    setInputTarget(null);
+                                    setHideInspector(false);
+                                  } else {
+                                    const id = uid();
+                                    update((p) => {
+                                      insertBlock(p, {
+                                        id,
+                                        template: "ads",
+                                        title: "協賛広告",
+                                        chapterId:
+                                          p.chapters.find(
+                                            (ch) => ch.name === "協賛",
+                                          )?.id ?? p.chapters[0].id,
+                                        adSize: ad.size,
+                                      });
+                                      p.assignments[`${id}/0:slot0`] = ad.id;
+                                    });
+                                    setSelected(`${id}/0`);
+                                    setTab("page");
+                                    setInputTarget(null);
+                                    setHideInspector(false);
+                                  }
+                                }}
+                              >
+                                誌面で配置を確認（空き枠がなければ広告ページを追加）
+                              </button>
                               <span className="ad-status">
                                 {layout.pages.find((pg) =>
                                   pg.slots.some((slot) => slot.adId === ad.id),
@@ -3024,6 +3140,9 @@ export function App() {
                 )}
                 {tab === "theme" && (
                   <>
+                    <p className="hint">
+                      冊子全体の配色はステップ1と同じ設定です。ここでの変更も全ページとステップ1に反映されます。
+                    </p>
                     <div className="eyebrow">DESIGN SYSTEM</div>
                     <h2>全体のデザイン</h2>
                     <PaletteControl

@@ -40,7 +40,9 @@ const describe = (v: unknown) =>
     ? v.join("、")
     : v === undefined || v === null || v === ""
       ? "未入力"
-      : String(v);
+      : ({ full: "1ページ", half: "1/2ページ", quarter: "1/4ページ" }[
+          String(v) as "full" | "half" | "quarter"
+        ] ?? (typeof v === "boolean" ? (v ? "要" : "不要") : String(v)));
 export function ExcelImport({
   project,
   update,
@@ -383,6 +385,14 @@ export function ExcelImport({
           「要確認」は既存の文章との違いや重複候補など、自動で登録先を決められない行です。各行の「変更前と変更後」を確認し、登録方法から「更新」または「新規追加」を選ぶと取り込まれます。「登録しない」を選ぶか要確認のままにした行は取り込みません。
         </p>
       )}
+      {rows.some(
+        (row, i) =>
+          row.sheet === "お知らせ・注意事項" && plans[i].candidates.length > 0,
+      ) && (
+        <p>
+          同じ内容・似た見出しのお知らせが既にあります。重複ページを作らないため、「変更前と変更後」を確認して既存ページを更新するか「登録しない」を選んでください。
+        </p>
+      )}
       {ignored.length > 0 && <p>対象外のシート：{ignored.join("、")}</p>}
       {rows.some((r) => r.sample) && (
         <p>
@@ -503,7 +513,18 @@ export function ExcelImport({
                         <th>
                           {row.sheet} {row.line}行目
                         </th>
-                        <td>{row.cells.join(" ／ ")}</td>
+                        <td>
+                          {row.cells
+                            .map(
+                              (v) =>
+                                ({
+                                  full: "1ページ",
+                                  half: "1/2ページ",
+                                  quarter: "1/4ページ",
+                                })[v] ?? v,
+                            )
+                            .join(" ／ ")}
+                        </td>
                         <td>
                           <span>
                             {stateLabels[decision.state]}

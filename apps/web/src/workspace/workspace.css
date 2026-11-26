@@ -291,3 +291,8 @@ foreignObject .direct-editor input {
 }
 
 .excel-drop-hint { display: block; margin-top: .75rem; font-size: .875rem; }
+
+/* White labels remain readable against dark table action buttons (WCAG AA). */
+.data-workspace .data-scroll td button { color: #ffffff; background: #24364d; border: 1px solid #62758f; }
+.data-workspace .data-scroll th button { color: #ffffff; }
+.data-workspace .data-scroll td button:disabled { color: #e2e8f0; background: #475569; opacity: 1; }

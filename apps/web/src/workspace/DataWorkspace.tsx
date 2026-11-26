@@ -413,13 +413,34 @@ export function DataWorkspace({
         </span>
       </div>
       <p>
-        入力不足は、企画名・学生企画と模擬店の建物・ステージの開催時刻が不足または不正な企画の件数です。基本情報や画像の不足は含みません。
+        「入力不足」は、企画名が空欄、学生企画・模擬店の建物が空欄、またはステージの開催時刻が不足・不正である企画の件数です。基本情報や画像の不足は含みません。
       </p>
       {sheet === "common" && (
         <p>
           開催回数・開催日・開催時間・大学名・学園祭名・テーマは、Excelの「基本情報」シートで管理しています。空欄でもPDF出力できます。
         </p>
       )}
+      <details>
+        <summary>Excelで取り込んだ基本情報を確認</summary>
+        <p>変更はExcelの「基本情報」シートで行い、再取り込みしてください。</p>
+        <dl>
+          {(
+            [
+              ["edition", "開催回数"],
+              ["date", "開催日"],
+              ["time", "開催時間"],
+              ["university", "大学名"],
+              ["festival", "学園祭名"],
+              ["tagline", "テーマ"],
+            ] as const
+          ).map(([key, label]) => (
+            <div key={key}>
+              <dt>{label}</dt>
+              <dd>{p[key] || "未設定"}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
       <nav className="data-tabs">
         {Object.entries(names).map(([k, v]) => (
           <button
@@ -442,7 +463,7 @@ export function DataWorkspace({
         {onImages && <button onClick={onImages}>画像を登録</button>}
         {onFinish && (
           <button className="primary" onClick={onFinish}>
-            次へ（誌面を確認する） →
+            次へ（誌面を確認・編集） →
           </button>
         )}
 

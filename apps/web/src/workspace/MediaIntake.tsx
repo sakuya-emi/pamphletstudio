@@ -89,7 +89,7 @@ export function MediaIntake({
       <section className="task-screen" aria-labelledby="media-finish">
         <p className="task-kicker">画像の登録</p>
         <h2 id="media-finish">
-          {missing ? "画像の登録状況" : "誌面を確認する"}
+          {missing ? "画像の登録状況" : "誌面を確認・編集"}
         </h2>
         <p>
           {items.length - missing}件登録済み
@@ -109,7 +109,7 @@ export function MediaIntake({
           </button>
         )}
         <button className="primary" onClick={onFinish}>
-          {missing ? "未登録のまま誌面を確認" : "誌面を確認する"}
+          {missing ? "未登録のまま誌面を確認・編集" : "誌面を確認・編集"}
         </button>
       </section>
     );

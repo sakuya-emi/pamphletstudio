@@ -376,6 +376,22 @@ export function validateProject(raw: unknown): Project {
 }
 export function prepareProjectForSave(project: Project): Project {
   const normalized = validateProject(project);
+  if (typeof normalized.id !== "string" || !normalized.id.trim())
+    throw new Error("プロジェクトIDが不正です。");
+  for (const [id, asset] of Object.entries(normalized.assets)) {
+    if (
+      !asset ||
+      asset.id !== id ||
+      typeof asset.mime !== "string" ||
+      typeof asset.data !== "string" ||
+      !/^data:[^,]+;base64,[A-Za-z0-9+/=]*$/.test(asset.data) ||
+      !Number.isFinite(asset.width) ||
+      asset.width <= 0 ||
+      !Number.isFinite(asset.height) ||
+      asset.height <= 0
+    )
+      throw new Error("素材情報が破損しています。");
+  }
   // Match the .pamph JSON representation before writing either storage format.
   return validateProject(JSON.parse(JSON.stringify(normalized)));
 }

@@ -218,7 +218,20 @@ export function ProjectHome({
       <div className="project-columns">
         <button
           className="project-new"
-          onClick={() => setNewName(uniqueProjectName(projects))}
+          onClick={() =>
+            setNewName(
+              uniqueProjectName(
+                projects,
+                "パンフレット " +
+                  new Intl.DateTimeFormat("ja-JP", {
+                    timeZone: "Asia/Tokyo",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date()),
+              ),
+            )
+          }
         >
           <span className="project-new-icon">
             <Plus size={42} strokeWidth={1} />

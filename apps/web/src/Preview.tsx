@@ -1,3 +1,4 @@
+import { sourceEditLabel } from "./workspace/workflow";
 import { resolveAsset } from "../../../packages/core/rule-marks";
 import { inputGuides } from "./workspace/inputGuides";
 import type { InputTarget } from "./workspace/ProductionEditor";
@@ -154,16 +155,7 @@ export function Preview({
               fill="transparent"
               tabIndex={0}
               role="button"
-              aria-label={
-                "編集 " +
-                (n.source!.field === "websiteUrl"
-                  ? "大学ウェブサイトのURL"
-                  : n.source!.field === "surveyUrl"
-                    ? "アンケートのURL"
-                    : n.kind === "text"
-                      ? n.text
-                      : n.source!.field)
-              }
+              aria-label={sourceEditLabel(project, n.source!)}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectSource?.(n.source!);

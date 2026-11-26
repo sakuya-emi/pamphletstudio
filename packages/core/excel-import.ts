@@ -299,6 +299,21 @@ type RowAction = {
   error?: string;
   requiresTarget?: boolean;
 };
+const noticeKey = (value: string) =>
+  norm(value).replace(
+    /(?:について|のお知らせ|のお願い|に関するお知らせ|についてのお知らせ|の注意事項|[・、。「」])/g,
+    "",
+  );
+const similarNotice = (a: string, b: string) => {
+  const x = noticeKey(a),
+    y = noticeKey(b);
+  return (
+    !!x &&
+    !!y &&
+    (x === y ||
+      (Math.min(x.length, y.length) >= 4 && (x.includes(y) || y.includes(x))))
+  );
+};
 const eq = (a: string | undefined, b: string) =>
   norm(a ?? "").toLowerCase() === norm(b).toLowerCase();
 export function planRow(p: Project, row: ImportRow): RowAction {
@@ -517,9 +532,16 @@ export function planRow(p: Project, row: ImportRow): RowAction {
           ? "waste"
           : undefined;
     action.candidates = p.blocks
-      .filter((x) => eq(x.title, key) || (kind && x.openingKind === kind))
+      .filter(
+        (x) =>
+          eq(x.title, key) ||
+          (kind && x.openingKind === kind) ||
+          (sheet === "お知らせ・注意事項" && similarNotice(x.title, key)),
+      )
       .map((x) => ({ id: x.id, label: x.title }));
-    action.requiresTarget = sheet === "ページ用テキスト";
+    action.requiresTarget =
+      sheet === "ページ用テキスト" ||
+      (sheet === "お知らせ・注意事項" && action.candidates.length > 0);
     action.apply = (q, id) => {
       if (id) {
         const x = q.blocks.find((x) => x.id === id)!;
@@ -680,7 +702,10 @@ export function importDecision(
           !plan.candidates.length
         ? importAdd
         : "");
-  if (target === importAdd) return { state: "add", target };
+  if (target === importAdd)
+    return plan.requiresTarget
+      ? { state: "review", target: "" }
+      : { state: "add", target };
   if (target) {
     const info = inspected.get(target);
     return !info || info.error

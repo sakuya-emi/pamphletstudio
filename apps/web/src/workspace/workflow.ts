@@ -1,3 +1,4 @@
+import type { LayoutPage } from "../../../../packages/layout-engine/types";
 import type { Project } from "../../../../packages/core/model";
 import {
   adCompany,
@@ -95,4 +96,61 @@ export function uniqueProjectName(
 }
 export function outputPages(total: number, padding: number) {
   return `出力${total}ページ（誌面${total - padding}ページ＋自動白紙${padding}ページ）`;
+}
+
+export function automaticBlankCounts(pages: LayoutPage[]) {
+  const start = pages.filter(
+    (p) => p.template === "blank" && p.automatic?.kind === "start",
+  ).length;
+  const padding = pages.filter(
+    (p) => p.template === "blank" && p.automatic?.kind === "padding",
+  ).length;
+  return { start, padding, total: start + padding };
+}
+export function sourceEditLabel(project: Project, source: DataSource) {
+  const names: Record<string, string> = {
+    name: "名称",
+    group: "団体名",
+    building: "建物",
+    floor: "階数",
+    room: "教室",
+    location: "開催場所",
+    place: "開催場所",
+    placeShort: "開催場所",
+    startTime: "開始時刻",
+    endTime: "終了時刻",
+    timeRange: "開催時刻",
+    title: "見出し",
+    body: "本文",
+    assetId: "画像",
+    coverId: "表紙画像",
+    logoId: "大学ロゴ",
+    websiteUrl: "大学ウェブサイトのURL",
+    surveyUrl: "アンケートのURL",
+    festivalDisplay: "開催回数・学園祭名",
+    date: "開催日",
+    time: "開催時間",
+    edition: "開催回数",
+    festival: "学園祭名",
+    university: "大学名",
+    tagline: "テーマ",
+  };
+  const title =
+    source.type === "chapter"
+      ? "章名"
+      : source.type === "pageNumber"
+        ? "ページ番号"
+        : (names[source.field] ??
+          (source.field.startsWith("bodyLine:") ? "本文の項目" : "内容"));
+  const record =
+    source.type === "chapter"
+      ? project.chapters.find((x) => x.id === source.id)?.name
+      : source.type === "event"
+        ? project.events.find((x) => x.id === source.id)?.name
+        : source.type === "block"
+          ? project.blocks.find((x) => x.id === source.id)?.title
+          : source.type === "staff"
+            ? project.staff.find((x) => x.id === source.id)?.name
+            : undefined;
+  return `${title}を編集${record ? "：" + record : ""}`;
 }

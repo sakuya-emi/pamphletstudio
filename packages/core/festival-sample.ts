@@ -94,6 +94,7 @@ export function createFestivalSample() {
   }
   Object.assign(addEvent(p, "food"), {
     name: "焼き菓子屋台（見本）",
+    posterRequired: false,
     group: "架空の調理部",
     building: "屋外",
   });

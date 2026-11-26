@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { exportPDF } from "../packages/pdf-export";
+import { PDFDocument } from "pdf-lib";
 import { beforeEach, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => new Map<string, unknown>());
 vi.mock("idb-keyval", () => ({
@@ -14,6 +17,7 @@ import { createFestivalProject } from "../packages/core/festival-opening";
 import {
   interpretRows,
   planRow,
+  inspectImportTarget,
   sheets,
   type ImportSheet,
 } from "../packages/core/excel-import";
@@ -32,20 +36,35 @@ it("real Excel template imports then cleared basic information saves, reloads an
   for (const [sheet, rows] of Object.entries(fixture)) {
     if (!Object.hasOwn(sheets, sheet)) continue;
     for (const row of interpretRows(sheet as ImportSheet, rows, true)) {
+      if (row.sample) continue;
       const plan = planRow(p, row);
       expect(plan.error, sheet + row.line).toBeFalsy();
-      plan.apply(p, plan.candidates[0]?.id);
+      const target = plan.candidates[0]?.id;
+      if (
+        target &&
+        !inspectImportTarget(p, row, target, plan).differences.length
+      )
+        continue;
+      plan.apply(p, target);
       imported++;
     }
   }
-  expect(imported).toBeGreaterThanOrEqual(53);
+  expect(imported).toBe(53);
   for (const field of ["edition", "date", "time", "university"])
     writeSource(p, { type: "project", id: p.id, field }, "");
+  const [medium, bold] = await Promise.all([
+    readFile("public/fonts/NotoSansCJKjp-Medium.ttf"),
+    readFile("public/fonts/NotoSansCJKjp-Bold.ttf"),
+  ]);
+  const output = await exportPDF(p, { medium, bold });
+  expect((await PDFDocument.load(output.bytes)).getPageCount()).toBe(
+    output.layout.pages.length,
+  );
   p.contentVersion = "generated";
   p.lastPdf = {
     contentVersion: "generated",
     at: new Date().toISOString(),
-    pages: 28,
+    pages: output.layout.pages.length,
   };
   await webStorage.autosave(p);
   const recent = await webStorage.recent();
@@ -57,7 +76,7 @@ it("real Excel template imports then cleared basic information saves, reloads an
   expect(loaded.lastPdf).toEqual(p.lastPdf);
   await webStorage.remove(p.id);
   expect(await webStorage.recent()).toEqual([]);
-});
+}, 60000);
 it.each([undefined, null, ""])(
   "recovers previously saved cleared edition %s",
   (value) => {
@@ -72,6 +91,21 @@ it("rejects invalid writes before replacing good data and reports only damaged e
     webStorage.autosave({ ...p, edition: Number.NaN }),
   ).rejects.toThrow();
   await expect(webStorage.save({ ...p, date: {} as string })).rejects.toThrow();
+  await expect(
+    webStorage.autosave({
+      ...p,
+      assets: {
+        broken: {
+          id: "broken",
+          name: "bad",
+          mime: "image/png",
+          data: "data:image/png;base64,",
+          width: 0,
+          height: 1,
+        },
+      },
+    }),
+  ).rejects.toThrow("素材");
   db.set("pamph:damaged", {
     id: "damaged",
     name: "壊れたデータ",
