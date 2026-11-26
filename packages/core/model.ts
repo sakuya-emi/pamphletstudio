@@ -113,7 +113,7 @@ export interface Block {
 }
 export interface Theme {
   indexShape?: "rounded" | "square";
-  scheduleStyle?: "bands" | "line";
+  scheduleStyle?: "compact" | "bands" | "line";
   numberStart?: number;
   background: string;
   ink: string;

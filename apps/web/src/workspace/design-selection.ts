@@ -53,5 +53,7 @@ export function applyThemeVariant(
 ) {
   if (key === "indexShape")
     p.theme.indexShape = value === "square" ? "square" : "rounded";
-  else p.theme.scheduleStyle = value === "line" ? "line" : "bands";
+  else
+    p.theme.scheduleStyle =
+      value === "compact" ? "compact" : value === "line" ? "line" : "bands";
 }

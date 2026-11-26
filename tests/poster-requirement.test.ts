@@ -94,11 +94,14 @@ it("unnecessary posters have text layout and no placeholder, required missing po
       .some((n) => n.source?.id === no.id && n.source.field === "assetId"),
   ).toBe(false);
   expect(
-    result.pages
-      .flatMap((pg) => pg.nodes)
-      .some(
-        (n) => n.kind === "text" && n.text.includes("ポスター未登録：ライブ"),
-      ),
+    result.issues.some((i) => i.message.includes("ポスター未登録：ライブ")),
+  ).toBe(true);
+  expect(
+    result.pages.some(
+      (pg) =>
+        pg.template === "stage" &&
+        pg.nodes.some((n) => n.source?.id === yes.id),
+    ),
   ).toBe(true);
   expect(mediaSummary(p).missing).toBe(2); // cover + live
   writeSource(

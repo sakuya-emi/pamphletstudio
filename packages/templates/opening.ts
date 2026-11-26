@@ -396,6 +396,82 @@ export function orderedSchedule(c: Context): Node[][] {
         numeric: true,
       }),
     );
+  // Small schedules use one full-width card list rather than two sparse spread pages.
+  if (
+    (!p.theme.scheduleStyle || p.theme.scheduleStyle === "compact") &&
+    items.length > 0 &&
+    items.length <= 6 &&
+    items.every(
+      (e) =>
+        16 +
+          wrap(e.name, 112, 5, c.measure).length * 6 +
+          wrap(
+            [e.group, e.location, e.notes].filter(Boolean).join(" ／ "),
+            112,
+            3,
+            c.measure,
+          ).length *
+            4 <=
+        154,
+    )
+  ) {
+    const compact: Node[][] = [[]];
+    let nodes = compact[0],
+      y = 36;
+    const targetHeight = Math.min(72, 144 / items.length);
+    for (const event of items) {
+      const names = wrap(event.name, 112, 5, c.measure);
+      const details = wrap(
+        [event.group, event.location, event.notes].filter(Boolean).join(" ／ "),
+        112,
+        3,
+        c.measure,
+      );
+      const height = Math.max(
+        targetHeight,
+        16 + names.length * 6 + details.length * 4,
+      );
+      if (y + height > 190 && nodes.length) {
+        nodes = [];
+        compact.push(nodes);
+        y = 36;
+      }
+      nodes.push(rect(14, y, 120, height - 3, "#e4f1f4", undefined));
+      nodes.push({
+        ...text(
+          18,
+          y + 3,
+          112,
+          [event.startTime, event.endTime].filter(Boolean).join("〜"),
+          3.5,
+          p.theme.ink,
+          true,
+        ),
+        source: { type: "event", id: event.id, field: "timeRange" },
+      });
+      names.forEach((line, i) =>
+        nodes.push({
+          ...text(18, y + 10 + i * 6, 112, line, 5, p.theme.ink, true),
+          source: { type: "event", id: event.id, field: "name" },
+        }),
+      );
+      details.forEach((line, i) =>
+        nodes.push({
+          ...text(
+            18,
+            y + 11 + names.length * 6 + i * 4,
+            112,
+            line,
+            3,
+            p.theme.ink,
+          ),
+          source: { type: "event", id: event.id, field: "notes" },
+        }),
+      );
+      y += height;
+    }
+    return compact;
+  }
   const pages: Node[][] = [];
   for (let at = 0; at < Math.max(1, items.length); at += 12) {
     const batch = items.slice(at, at + 12);

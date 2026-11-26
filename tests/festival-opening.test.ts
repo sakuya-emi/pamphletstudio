@@ -41,6 +41,7 @@ it("新規冊子の冒頭11ページに目次と左右のタイムテーブル�
 });
 it("開始時刻順の均等枠を使い、終了時刻で位置を変更しない", () => {
   const p = createFestivalProject();
+  p.theme.scheduleStyle = "bands";
   for (const time of ["15:00", "09:30", "10:00", "14:00", "11:30"]) {
     const e = addEvent(p, "stage");
     e.name = time;

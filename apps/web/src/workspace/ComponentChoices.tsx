@@ -239,6 +239,7 @@ export function ComponentChoices({
             ["square", "四角"],
           ]
         : [
+            ["compact", "コンパクト（6件以下は1ページ）"],
             ["bands", "色帯と縦書き"],
             ["line", "細い時間軸と縦書き"],
           ]
@@ -251,7 +252,7 @@ export function ComponentChoices({
         label,
         p,
         page: pages.find((pg) => pg.template === (index ? "events" : "stage"))!,
-        defaultValue: index ? "rounded" : "bands",
+        defaultValue: index ? "rounded" : "compact",
       };
     });
   }, [category, sample, measure]);
@@ -641,7 +642,7 @@ export function ComponentChoices({
               <b>{t.name.replace(/^T\d+\s+/, "")}</b>
               {!supported && (
                 <small>
-                  今は適用できる本文ページがありません。Excelで外部・特別企画などの本文ページを追加した後、ステップ3のページタブから箇条書きを選べます。標準の表示で先へ進めます。
+                  今は適用できる本文ページがありません。Excelで外部・特別企画などの本文ページを追加した後、ステップ3上部の「箇条書きを選ぶ」ボタンから選べます。標準の表示で先へ進めます。
                 </small>
               )}
               {t.sharedSource && (

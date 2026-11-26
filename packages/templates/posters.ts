@@ -51,12 +51,18 @@ export function posterNodes(
   });
 }
 export function posterPages(c: Context): Node[][] {
-  const events = listingEvents(c.project, c.block.eventCategory).filter(
+  const listed = listingEvents(c.project, c.block.eventCategory);
+  const stageCovered =
+    ["stage", "studentStage"].includes(c.block.eventCategory ?? "") &&
+    textCovered(c);
+  const events = listed.filter(
       (e) =>
         e.category !== "kitchen" &&
-        (c.block.posterMode === "single" || e.posterRequired !== false),
+        (c.block.posterMode === "single" || e.posterRequired !== false) &&
+        !(stageCovered && !e.assetId),
     ),
     pages: Node[][] = [];
+  if (stageCovered && listed.length && !events.length) return [];
   if (c.block.posterMode === "single") {
     const result: Node[][] = [];
     let textRun: Event[] = [];

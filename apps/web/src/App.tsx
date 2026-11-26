@@ -554,6 +554,7 @@ export function App() {
       );
       worker.onmessage = async (e) => {
         if (e.data.status) {
+          setBusy(e.data.status.phase);
           setPdfProgress((previous) =>
             previous ? { ...previous, ...e.data.status } : previous,
           );
@@ -561,14 +562,6 @@ export function App() {
         }
         if (typeof e.data.phase === "string") {
           setBusy(e.data.phase);
-          return;
-        }
-        if (typeof e.data.progress === "number") {
-          setBusy(
-            e.data.progress >= 95
-              ? `PDFファイルを仕上げています… ${e.data.progress}%`
-              : `PDFのページを処理中… ${e.data.progress}%`,
-          );
           return;
         }
         if (e.data.error) {
@@ -1819,6 +1812,56 @@ export function App() {
           <main className="canvas-panel">
             <div className="canvas-toolbar">
               <p>{outputPages(layout.pages.length, paddingCount)}</p>
+              <button
+                onClick={() => {
+                  const target =
+                    block &&
+                    findComponent(
+                      project,
+                      block,
+                      "text",
+                      undefined,
+                      "block.body",
+                    )
+                      ? block
+                      : project.blocks.find((b) =>
+                          findComponent(
+                            project,
+                            b,
+                            "text",
+                            undefined,
+                            "block.body",
+                          ),
+                        );
+                  if (target) {
+                    setSelected(`${target.id}/0`);
+                    setDesignPicker({
+                      category: "箇条書き",
+                      blockId: target.id,
+                    });
+                  } else
+                    setNotice(
+                      "箇条書きを適用できる本文ページがありません。掲載情報の外部・特別企画などに本文を追加してください。",
+                    );
+                }}
+              >
+                箇条書きを選ぶ
+              </button>
+              {page.template === "stage" && (
+                <button
+                  onClick={() =>
+                    update(
+                      (p) => {
+                        p.theme.scheduleStyle = "compact";
+                      },
+                      true,
+                      "タイムテーブルのコンパクト配置",
+                    )
+                  }
+                >
+                  タイムテーブルをコンパクトにする
+                </button>
+              )}
               <div className="segmented">
                 <button
                   aria-pressed={!hidePages}
@@ -3140,7 +3183,7 @@ export function App() {
                                       measure,
                                     );
                                     setNotice(
-                                      `広告ページを追加して配置しました。出力${beforeTotal}→${afterLayout.pages.length}ページ、自動白紙${beforeBlank}→${automaticBlankCounts(afterLayout.pages).total}ページ。章の開始位置と総ページ数の調整も再計算しています。`,
+                                      `広告ページを追加して配置しました。出力${beforeTotal}→${afterLayout.pages.length}ページ、自動白紙${beforeBlank}→${automaticBlankCounts(afterLayout.pages).total}ページ。追加後の内訳は、章・見開きの開始位置調整${automaticBlankCounts(afterLayout.pages).start}ページ、総ページ数調整${automaticBlankCounts(afterLayout.pages).padding}ページです。`,
                                     );
                                     setSelected(`${id}/0`);
                                     setTab("page");
@@ -3461,7 +3504,7 @@ export function App() {
       )}
       {pdfSuccess && !notice && (
         <div className="toast" role="status">
-          PDFを出力しました
+          PDFを出力しました（ページ描画100%・保存完了）
           {project.lastPdf ? `（全${project.lastPdf.pages}ページ）` : "。"}
           <button
             onClick={() => setPdfSuccess(false)}

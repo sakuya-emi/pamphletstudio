@@ -22,6 +22,8 @@ export function PdfProgress({
     return () => clearInterval(id);
   }, [state?.startedAt]);
   if (!state) return <span>{message}</span>;
+  const percent =
+    state.total > 0 ? Math.round((state.completed / state.total) * 100) : 0;
   return (
     <section aria-label="PDF生成の進捗" role="status">
       <p>{message}</p>
@@ -29,11 +31,13 @@ export function PdfProgress({
         {state.phase} ／ 描画済み {state.completed} / {state.total || "計算中"}{" "}
         ページ ／ 経過 {elapsed} 秒
       </p>
-      <progress
-        aria-label="PDFページ描画"
-        value={state.completed}
-        max={state.total || 1}
-      />
+      <p>
+        ページ描画進捗 {percent}%
+        {state.completed === state.total && state.total > 0
+          ? "（描画完了・ファイルの仕上げを確認中）"
+          : ""}
+      </p>
+      <progress aria-label="PDFページ描画" value={percent} max={100} />
       <p>
         フォントの読み込み・埋め込み中はページ数が0のまま待機します。初回は30秒以上かかる場合があります。
       </p>
