@@ -1,0 +1,75 @@
+name: Deploy to Lolipop
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lolipop-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check deployment settings
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for setting in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_SERVER_DIR; do
+            if [[ -z "${!setting}" ]]; then
+              echo "::error::Missing repository secret: ${setting}"
+              exit 1
+            fi
+          done
+          if [[ "$FTP_SERVER" == *://* ]]; then
+            echo "::error::FTP_SERVER must be a hostname without ftp:// or ftps://."
+            exit 1
+          fi
+          if [[ "$FTP_SERVER_DIR" != */ ]]; then
+            echo "::error::FTP_SERVER_DIR must end with a slash."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: |
+          mkdir -p tmp
+          npm test
+
+      - name: Build for /pamphlet-studio/
+        run: npm run build -- --base=/pamphlet-studio/
+
+      - name: Upload to Lolipop with FTPS
+        uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65 # v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          security: strict
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          dangerous-clean-slate: false
+          log-level: minimal
