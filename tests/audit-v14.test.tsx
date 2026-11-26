@@ -37,8 +37,7 @@ it("ceremony pages have no poster guides or frames covering their names and time
     const e = p.events.find((e) => e.name === name)!;
     const pg = l.pages.find(
       (pg) =>
-        pg.template === "posters" &&
-        pg.nodes.some((n) => n.source?.id === e.id),
+        pg.template === "stage" && pg.nodes.some((n) => n.source?.id === e.id),
     )!;
     expect(e.posterRequired).toBe(false);
     expect(inputGuides(p, pg).some((g) => g.target.action === "poster")).toBe(
@@ -49,9 +48,19 @@ it("ceremony pages have no poster guides or frames covering their names and time
         (n) => n.source?.id === e.id && n.source.field === "assetId",
       ),
     ).toBe(false);
-    expect(pg.nodes.some((n) => n.kind === "text" && n.text === name)).toBe(
-      true,
-    );
+    expect(
+      pg.nodes
+        .filter((n) => n.kind === "text" && n.source?.id === e.id)
+        .map((n) => (n.kind === "text" ? n.text : ""))
+        .join(""),
+    ).toContain(name);
+    expect(
+      l.pages.some(
+        (pg) =>
+          pg.template === "posters" &&
+          pg.nodes.some((n) => n.source?.id === e.id),
+      ),
+    ).toBe(false);
   }
   expect(
     l.issues.some((i) =>

@@ -3,6 +3,16 @@ import { adPlaceholder } from "./ads";
 import { text } from "../layout-engine/types";
 import { listingEvents, type Event } from "../core/model";
 import { type Context, type Node } from "../layout-engine/types";
+function textCovered(c: Context): boolean {
+  return c.project.blocks.some(
+    (b) =>
+      b.id !== c.block.id &&
+      !b.templateId &&
+      ((b.template === "stage" &&
+        ["stage", "studentStage"].includes(c.block.eventCategory ?? "")) ||
+        (b.template === "events" && b.eventCategory === c.block.eventCategory)),
+  );
+}
 export function posterNodes(
   c: Context,
   events: Event[],
@@ -52,9 +62,11 @@ export function posterPages(c: Context): Node[][] {
     let textRun: Event[] = [];
     const flush = () => {
       if (textRun.length) {
-        result.push(
-          ...eventPages({ ...c, project: { ...c.project, events: textRun } }),
-        );
+        const covered = textCovered(c);
+        if (!covered)
+          result.push(
+            ...eventPages({ ...c, project: { ...c.project, events: textRun } }),
+          );
         textRun = [];
       }
     };
@@ -87,7 +99,7 @@ export function posterPages(c: Context): Node[][] {
       );
     }
     flush();
-    return result.length ? result : [[]];
+    return events.length ? result : [[]];
   }
   for (let i = 0; i < events.length; i += 4)
     pages.push(
@@ -100,10 +112,11 @@ export function posterPages(c: Context): Node[][] {
   const textOnly = listingEvents(c.project, c.block.eventCategory).filter(
     (e) => e.category !== "kitchen" && e.posterRequired === false,
   );
-  if (textOnly.length)
+  if (textOnly.length && !textCovered(c))
     pages.push(
       ...eventPages({ ...c, project: { ...c.project, events: textOnly } }),
     );
+  if (!pages.length && textOnly.length && textCovered(c)) return [];
   return !pages.length && c.block.eventCategory ? [[]] : pages;
 }
 /** Measured content flow; never reduce an ad frame or poster below 60mm tall. */

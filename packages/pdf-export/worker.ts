@@ -11,8 +11,11 @@ self.onmessage = async (e: MessageEvent<Project>) => {
       phase:
         "組版とフォント埋め込みを準備中…（初回は30秒以上かかる場合があります）",
     });
-    const result = await exportPDF(e.data, fonts, (progress) =>
-      self.postMessage({ progress }),
+    const result = await exportPDF(
+      e.data,
+      fonts,
+      (progress) => self.postMessage({ progress }),
+      (status) => self.postMessage({ status }),
     );
     self.postMessage(
       { bytes: result.bytes, pageCount: result.layout.pages.length },

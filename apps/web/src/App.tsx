@@ -1,3 +1,4 @@
+import { PdfProgress, type PdfProgressState } from "./workspace/PdfProgress";
 import {
   outputPages,
   automaticBlankCounts,
@@ -147,6 +148,7 @@ export function App() {
   const [hidePages, setHidePages] = useState(true);
   const [hideInspector, setHideInspector] = useState(true);
   const [pdfSuccess, setPdfSuccess] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState<PdfProgressState | null>(null);
   const [pendingLibraryPage, setPendingLibraryPage] = useState<{
     template: DesignTemplate;
     release?: import("../../../packages/designer/library").LibraryRelease;
@@ -527,11 +529,18 @@ export function App() {
     setNotice("");
     setPdfSuccess(false);
     setModal(null);
+    setPdfProgress({
+      completed: 0,
+      total: source === activeProject.current ? layout.pages.length : 0,
+      phase: "準備中",
+      startedAt: Date.now(),
+    });
     setBusy("PDF生成の準備中…（初回は30秒以上かかる場合があります）");
     let worker: Worker | undefined;
     function finish(message?: string) {
       worker?.terminate();
       pdfRunning.current = false;
+      setPdfProgress(null);
       setBusy("");
       if (message)
         setNotice(
@@ -544,6 +553,12 @@ export function App() {
         { type: "module" },
       );
       worker.onmessage = async (e) => {
+        if (e.data.status) {
+          setPdfProgress((previous) =>
+            previous ? { ...previous, ...e.data.status } : previous,
+          );
+          return;
+        }
         if (typeof e.data.phase === "string") {
           setBusy(e.data.phase);
           return;
@@ -759,7 +774,7 @@ export function App() {
         </Suspense>
         {busy && (
           <div className="busy" role="status">
-            {busy}
+            <PdfProgress state={pdfProgress} message={busy} />
           </div>
         )}
         {pdfSuccess && !notice && (
@@ -934,7 +949,11 @@ export function App() {
             </button>
           </div>
         )}
-        {busy && <div className="busy">{busy}</div>}
+        {busy && (
+          <div className="busy">
+            <PdfProgress state={pdfProgress} message={busy} />
+          </div>
+        )}
       </div>
     );
   let visible = spread
@@ -1260,7 +1279,11 @@ export function App() {
         {!designPicker && (designer || step !== 0) && libraryPageDialog()}
         {visualPicker()}
         {!designPicker && (designer || step !== 0) && partDialog()}
-        {busy && <div className="busy">{busy}</div>}
+        {busy && (
+          <div className="busy">
+            <PdfProgress state={pdfProgress} message={busy} />
+          </div>
+        )}
         {notice && (
           <div className="toast">
             {notice}
@@ -3039,7 +3062,16 @@ export function App() {
                                     });
                                   }}
                                 >
-                                  <option value="">配置先を選ぶ</option>
+                                  <option value="">
+                                    {layout.pages.some((pg) =>
+                                      pg.slots.some(
+                                        (slot) =>
+                                          slot.size === ad.size && !slot.adId,
+                                      ),
+                                    )
+                                      ? "配置先を選ぶ"
+                                      : "同じ規格の空き枠なし（下のボタンで追加）"}
+                                  </option>
                                   {layout.pages.flatMap((pg) =>
                                     pg.slots
                                       .filter((slot) => slot.size === ad.size)
@@ -3082,19 +3114,34 @@ export function App() {
                                     setHideInspector(false);
                                   } else {
                                     const id = uid();
-                                    update((p) => {
-                                      insertBlock(p, {
-                                        id,
-                                        template: "ads",
-                                        title: "協賛広告",
-                                        chapterId:
-                                          p.chapters.find(
-                                            (ch) => ch.name === "協賛",
-                                          )?.id ?? p.chapters[0].id,
-                                        adSize: ad.size,
-                                      });
-                                      p.assignments[`${id}/0:slot0`] = ad.id;
-                                    });
+                                    const beforeTotal = layout.pages.length,
+                                      beforeBlank = automaticBlankCounts(
+                                        layout.pages,
+                                      ).total;
+                                    update(
+                                      (p) => {
+                                        insertBlock(p, {
+                                          id,
+                                          template: "ads",
+                                          title: "協賛広告",
+                                          chapterId:
+                                            p.chapters.find(
+                                              (ch) => ch.name === "協賛",
+                                            )?.id ?? p.chapters[0].id,
+                                          adSize: ad.size,
+                                        });
+                                        p.assignments[`${id}/0:slot0`] = ad.id;
+                                      },
+                                      true,
+                                      "広告ページの追加と配置",
+                                    );
+                                    const afterLayout = layoutProject(
+                                      activeProject.current,
+                                      measure,
+                                    );
+                                    setNotice(
+                                      `広告ページを追加して配置しました。出力${beforeTotal}→${afterLayout.pages.length}ページ、自動白紙${beforeBlank}→${automaticBlankCounts(afterLayout.pages).total}ページ。章の開始位置と総ページ数の調整も再計算しています。`,
+                                    );
                                     setSelected(`${id}/0`);
                                     setTab("page");
                                     setInputTarget(null);
@@ -3102,7 +3149,7 @@ export function App() {
                                   }
                                 }}
                               >
-                                誌面で配置を確認（空き枠がなければ広告ページを追加）
+                                誌面で配置を確認（空き枠がなければページを追加し、白紙も再計算）
                               </button>
                               <span className="ad-status">
                                 {layout.pages.find((pg) =>
@@ -3435,7 +3482,7 @@ export function App() {
       {busy && (
         <div className="busy">
           <div className="spinner" />
-          {busy}
+          <PdfProgress state={pdfProgress} message={busy} />
         </div>
       )}
       {modal && (

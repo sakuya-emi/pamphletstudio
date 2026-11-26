@@ -37,7 +37,7 @@ it("first survey import defaults to update even with new heading and body; later
       project={p}
       update={() => {}}
       initialSheet="アンケート"
-      initialText="https://example.com/form\t来場者アンケート\t新しい案内本文"
+      initialText={"https://example.com/form\t来場者アンケート\t新しい案内本文"}
       close={() => {}}
       done={() => {}}
     />,
@@ -89,7 +89,7 @@ it("survey URL is printed and also editable from common-information rows", () =>
   );
   expect(b.surveyUrl).toBe("https://example.com/updated");
 });
-it("text-only ceremony events share a compact page and retain both start and end times", () => {
+it("text-only ceremonies consolidate into existing schedules and retain names and times", () => {
   const p = createFestivalProject();
   p.events = [];
   const b = p.blocks.find(
@@ -110,12 +110,12 @@ it("text-only ceremony events share a compact page and retain both start and end
   const pages = layoutProject(p, fallbackMeasure).pages.filter(
     (pg) => pg.blockId === b.id,
   );
-  expect(pages).toHaveLength(1);
-  const text = pages
-    .flatMap((p) => p.nodes)
+  expect(pages).toHaveLength(0);
+  const text = layoutProject(p, fallbackMeasure)
+    .pages.flatMap((p) => p.nodes)
     .filter((n) => n.kind === "text")
     .map((n) => (n.kind === "text" ? n.text : ""))
-    .join(" ");
+    .join("");
   expect(text).toContain("開会式");
   expect(text).toContain("閉会式");
   expect(text).toContain("09:30〜10:00");
@@ -132,7 +132,7 @@ it("unsupported bullet styles are disabled with an explanation instead of failin
       select={() => {}}
     />,
   );
-  expect(html).toContain("適用先の本文ページがないため選択できません");
+  expect(html).toContain("標準の表示で先へ進めます");
   expect(html).toContain('disabled=""');
 });
 it("unplaced ads explain missing capacity, and survey ownership works without an existing survey page", () => {

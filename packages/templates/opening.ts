@@ -150,20 +150,17 @@ export function openingPage(c: Context): Node[] {
       );
       const urlLines = wrap(
         normalizeSurveyUrl(b.surveyUrl),
-        110,
-        2.3,
+        47,
+        2.1,
         c.measure,
       );
       const display =
         urlLines.length <= 3
           ? urlLines
-          : [
-              ...urlLines.slice(0, 2),
-              "…（長いURLのため省略。QRコードをご利用ください）",
-            ];
+          : [...urlLines.slice(0, 2), "…（続きはQRコード）"];
       display.forEach((line, i) =>
         n.push({
-          ...text(25, 190 + i * 2.8, 110, line, 2.3, ink),
+          ...text(88, 188 + i * 2.8, 47, line, 2.1, ink),
           source: source("surveyUrl"),
         }),
       );
@@ -436,15 +433,23 @@ export function orderedSchedule(c: Context): Node[][] {
             ...rect(xx, y, w, 8, fill),
             source: { type: "event", id: e.id, field: "startTime" },
           });
+        const timeLabel =
+          e.posterRequired === false && e.endTime
+            ? `${e.startTime || "—"}〜${e.endTime}`
+            : e.startTime || "—";
+        const timeSize = Math.min(
+          lineStyle ? 3.1 : 3.8,
+          (cellWidth - 3) / Math.max(1, c.measure(timeLabel, 1, false)),
+        );
         ns.push({
           ...text(
             lineStyle
-              ? mid - c.measure(e.startTime || "—", 3.1, false) / 2
+              ? mid - c.measure(timeLabel, timeSize, false) / 2
               : xx + 2,
             y + 2,
             cellWidth - 3,
-            e.startTime || "—",
-            lineStyle ? 3.1 : 3.8,
+            timeLabel,
+            timeSize,
             lineStyle ? p.theme.ink : j % 2 ? "#24343b" : "#ffffff",
             !lineStyle,
           ),

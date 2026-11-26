@@ -31,6 +31,11 @@ export async function exportPDF(
   p: Project,
   bytes: FontBytes,
   onProgress?: (n: number) => void,
+  onStatus?: (status: {
+    completed: number;
+    total: number;
+    phase: string;
+  }) => void,
 ): Promise<{ bytes: Uint8Array; layout: Layout }> {
   const measure = fontMeasure(bytes),
     layout = layoutProject(p, measure);
@@ -38,6 +43,11 @@ export async function exportPDF(
     throw new Error(
       "印刷範囲・素材参照などのエラーを解消してから出力してください。",
     );
+  onStatus?.({
+    completed: 0,
+    total: layout.pages.length,
+    phase: "フォント埋め込み中",
+  });
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   pdf.setTitle(p.name);
@@ -224,8 +234,18 @@ export async function exportPDF(
       if (n.rotation) page.pushOperators(popGraphicsState());
       page.pushOperators(popGraphicsState());
     }
+    onStatus?.({
+      completed: i + 1,
+      total: layout.pages.length,
+      phase: "ページ描画中",
+    });
     onProgress?.(Math.round(((i + 1) / layout.pages.length) * 90));
   }
+  onStatus?.({
+    completed: layout.pages.length,
+    total: layout.pages.length,
+    phase: "PDFファイル仕上げ中",
+  });
   onProgress?.(95);
   const saved = await pdf.save();
   onProgress?.(100);

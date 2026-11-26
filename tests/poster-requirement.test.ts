@@ -84,8 +84,10 @@ it("unnecessary posters have text layout and no placeholder, required missing po
   expect(
     result.pages
       .flatMap((pg) => pg.nodes)
-      .some((n) => n.kind === "text" && n.text === "式典"),
-  ).toBe(true);
+      .filter((n) => n.kind === "text" && n.source?.id === no.id)
+      .map((n) => (n.kind === "text" ? n.text : ""))
+      .join(""),
+  ).toContain("式典");
   expect(
     result.pages
       .flatMap((pg) => pg.nodes)

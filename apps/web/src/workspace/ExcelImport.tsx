@@ -110,6 +110,9 @@ export function ExcelImport({
       row.sheet === "アンケート" &&
       ["review", "error"].includes(decisions[i].state),
   );
+  const unresolvedRows = decisions.flatMap((d, i) =>
+    d.state === "review" ? [i] : [],
+  );
   const effective = decisions.map((d) =>
     d.state === "add" || d.state === "update" ? d.target : "",
   );
@@ -238,6 +241,12 @@ export function ExcelImport({
     setError(next.length ? "" : "登録できる行がありません。");
   };
   function apply() {
+    if (unresolvedRows.length) {
+      setError(
+        `要確認${unresolvedRows.length}件が残っています。更新・新規追加・登録しないを選んでください。`,
+      );
+      return;
+    }
     if (unresolvedSurvey) {
       setError(
         "アンケートの登録方法を選択してください。登録しない場合も、明示的に「登録しない」を選んでください。",
@@ -412,6 +421,24 @@ export function ExcelImport({
         <p>
           「アンケート」シートのURLから、誌面とPDFのQRコードを自動生成します。QR画像の登録は不要です。既存URLがある場合は変更前後を確認し、「更新」を選んでください。
         </p>
+      )}
+      {unresolvedRows.length > 0 && (
+        <div role="alert">
+          <p>
+            要確認{unresolvedRows.length}
+            件が未確定です。このまま登録はできません。各行で更新・新規追加・登録しないを選んでください。
+          </p>
+          <button
+            onClick={() =>
+              setChoices((previous) => ({
+                ...previous,
+                ...Object.fromEntries(unresolvedRows.map((i) => [i, ""])),
+              }))
+            }
+          >
+            要確認{unresolvedRows.length}件をすべて登録しない
+          </button>
+        </div>
       )}
       {unresolvedSurvey && (
         <p role="alert">
@@ -662,6 +689,7 @@ export function ExcelImport({
             className="primary"
             disabled={
               loading ||
+              unresolvedRows.length > 0 ||
               unresolvedSurvey ||
               !count ||
               badTargets ||

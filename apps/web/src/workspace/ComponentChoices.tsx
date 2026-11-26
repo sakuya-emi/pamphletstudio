@@ -640,7 +640,9 @@ export function ComponentChoices({
               </div>
               <b>{t.name.replace(/^T\d+\s+/, "")}</b>
               {!supported && (
-                <small>適用先の本文ページがないため選択できません。</small>
+                <small>
+                  今は適用できる本文ページがありません。Excelで外部・特別企画などの本文ページを追加した後、ステップ3のページタブから箇条書きを選べます。標準の表示で先へ進めます。
+                </small>
               )}
               {t.sharedSource && (
                 <small>
