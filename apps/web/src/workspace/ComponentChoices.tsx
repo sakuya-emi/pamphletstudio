@@ -588,11 +588,34 @@ export function ComponentChoices({
           })}
         {examples.map(({ t, p, page, bounds, other }) => {
           const active = activeComponent?.id === t.id;
+          const binding = t.objects[0]?.binding;
+          const supported =
+            category !== "箇条書き" ||
+            (allowGlobal
+              ? project.blocks
+              : block
+                ? [block]
+                : project.blocks
+            ).some(
+              (b) =>
+                !!findComponent(
+                  project,
+                  b,
+                  t.componentKind!,
+                  undefined,
+                  binding,
+                ),
+            );
           return (
             <button
               key={t.id}
               aria-pressed={pendingId === t.id}
-              disabled={!page.nodes.some((n) => !n.editorOnly)}
+              disabled={!supported || !page.nodes.some((n) => !n.editorOnly)}
+              title={
+                !supported
+                  ? "この冊子には箇条書きを適用できる本文ページがありません。"
+                  : undefined
+              }
               onClick={() => (
                 setVariant(undefined),
                 select(t, imported.find((r) => r.template.id === t.id)?.release)
@@ -616,6 +639,9 @@ export function ComponentChoices({
                 <Preview page={page} project={p} thumb bounds={bounds} />
               </div>
               <b>{t.name.replace(/^T\d+\s+/, "")}</b>
+              {!supported && (
+                <small>適用先の本文ページがないため選択できません。</small>
+              )}
               {t.sharedSource && (
                 <small>
                   公開版 v{t.sharedSource.version} ·{" "}

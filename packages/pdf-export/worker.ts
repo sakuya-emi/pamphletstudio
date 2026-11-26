@@ -3,7 +3,14 @@ import { exportPDF } from "./index";
 import type { Project } from "../core/model";
 self.onmessage = async (e: MessageEvent<Project>) => {
   try {
+    self.postMessage({
+      phase: "フォントを読み込み中…（初回は30秒以上かかる場合があります）",
+    });
     const fonts = await loadFontBytes();
+    self.postMessage({
+      phase:
+        "組版とフォント埋め込みを準備中…（初回は30秒以上かかる場合があります）",
+    });
     const result = await exportPDF(e.data, fonts, (progress) =>
       self.postMessage({ progress }),
     );

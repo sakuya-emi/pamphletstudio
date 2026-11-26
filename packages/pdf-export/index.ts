@@ -226,5 +226,8 @@ export async function exportPDF(
     }
     onProgress?.(Math.round(((i + 1) / layout.pages.length) * 90));
   }
-  return { bytes: await pdf.save(), layout };
+  onProgress?.(95);
+  const saved = await pdf.save();
+  onProgress?.(100);
+  return { bytes: saved, layout };
 }

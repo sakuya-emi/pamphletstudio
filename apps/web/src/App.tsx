@@ -527,7 +527,7 @@ export function App() {
     setNotice("");
     setPdfSuccess(false);
     setModal(null);
-    setBusy("PDF生成の準備中…");
+    setBusy("PDF生成の準備中…（初回は30秒以上かかる場合があります）");
     let worker: Worker | undefined;
     function finish(message?: string) {
       worker?.terminate();
@@ -544,8 +544,16 @@ export function App() {
         { type: "module" },
       );
       worker.onmessage = async (e) => {
+        if (typeof e.data.phase === "string") {
+          setBusy(e.data.phase);
+          return;
+        }
         if (typeof e.data.progress === "number") {
-          setBusy("PDFのページを処理中…");
+          setBusy(
+            e.data.progress >= 95
+              ? `PDFファイルを仕上げています… ${e.data.progress}%`
+              : `PDFのページを処理中… ${e.data.progress}%`,
+          );
           return;
         }
         if (e.data.error) {

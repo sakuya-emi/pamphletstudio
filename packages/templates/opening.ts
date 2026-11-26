@@ -148,6 +148,25 @@ export function openingPage(c: Context): Node[] {
           source: source("surveyUrl"),
         })),
       );
+      const urlLines = wrap(
+        normalizeSurveyUrl(b.surveyUrl),
+        110,
+        2.3,
+        c.measure,
+      );
+      const display =
+        urlLines.length <= 3
+          ? urlLines
+          : [
+              ...urlLines.slice(0, 2),
+              "…（長いURLのため省略。QRコードをご利用ください）",
+            ];
+      display.forEach((line, i) =>
+        n.push({
+          ...text(25, 190 + i * 2.8, 110, line, 2.3, ink),
+          source: source("surveyUrl"),
+        }),
+      );
     } catch {
       n.push({
         ...rect(88, 139, 47, 47, "#f7f5f4", "#b2a9aa", 2),

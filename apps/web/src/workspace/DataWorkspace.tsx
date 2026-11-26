@@ -220,6 +220,13 @@ export function DataWorkspace({
             field: "posterRequired",
           } as DataSource,
         })),
+      ...p.blocks
+        .filter((b) => b.openingKind === "survey")
+        .map((b) => ({
+          id: b.id + ":surveyUrl",
+          label: b.title + "：アンケートURL（QRコード）",
+          source: { type: "block", id: b.id, field: "surveyUrl" } as DataSource,
+        })),
       ...p.blocks.flatMap((b) => [
         {
           id: b.id + ":title",

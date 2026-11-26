@@ -153,7 +153,14 @@ export function Preview({
             fill="transparent"
             tabIndex={0}
             role="button"
-            aria-label={sourceEditLabel(project, n.source!)}
+            aria-label={
+              sourceEditLabel(project, n.source!) +
+              (n.source?.field === "surveyUrl" &&
+              n.kind === "text" &&
+              !n.editorOnly
+                ? "（URL文字列）"
+                : "")
+            }
             onClick={(e) => {
               e.stopPropagation();
               onSelectSource?.(n.source!);

@@ -718,13 +718,16 @@ export function inspectImportTarget(
     .map(([k, v]) => ({ field: fieldLabels[k], before: before[k], after: v }));
   const safe =
     differences.length > 0 &&
-    differences.every(
-      (d) =>
-        d.before === undefined ||
-        d.before === null ||
-        d.before === "" ||
-        (row.sheet === "基本情報" && d.field === "開催回数" && d.before === 0),
-    );
+    ((row.sheet === "アンケート" && !before.surveyUrl) ||
+      differences.every(
+        (d) =>
+          d.before === undefined ||
+          d.before === null ||
+          d.before === "" ||
+          (row.sheet === "基本情報" &&
+            d.field === "開催回数" &&
+            d.before === 0),
+      ));
   return { differences, safe, error: undefined };
 }
 export type ImportState =
@@ -768,4 +771,33 @@ export function importDecision(
       return { state: "same", target: "" };
   }
   return { state: "review", target: "" };
+}
+
+/** When a valid survey row exists, it owns existing survey-page text as well as the URL. */
+export function surveyConflictRows(
+  project: Project,
+  rows: ImportRow[],
+): Set<number> {
+  if (
+    !rows.some(
+      (row) => row.sheet === "アンケート" && !row.error && row.cells[0]?.trim(),
+    )
+  )
+    return new Set();
+  const surveys = new Set(
+    project.blocks.filter((b) => b.openingKind === "survey").map((b) => b.id),
+  );
+  return new Set(
+    rows.flatMap((row, i) =>
+      ["お知らせ・注意事項", "ページ用テキスト"].includes(row.sheet) &&
+      (planRow(project, row).candidates.some((c) => surveys.has(c.id)) ||
+        /アンケート/.test(
+          row.sheet === "ページ用テキスト"
+            ? (row.cells[0] ?? "")
+            : (row.cells[1] ?? ""),
+        ))
+        ? [i]
+        : [],
+    ),
+  );
 }

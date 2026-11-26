@@ -9,7 +9,7 @@ import {
 export function eventPages(c: Context): Node[][] {
   const { project: p, left: x, width: w, measure } = c;
   const size = p.theme.fontSize;
-  const stage = c.block.eventCategory === "studentStage";
+  const stage = ["stage", "studentStage"].includes(c.block.eventCategory ?? "");
   const events = listingEvents(p, c.block.eventCategory);
   if (stage)
     events.sort((a, b) =>
@@ -60,7 +60,7 @@ export function eventPages(c: Context): Node[][] {
       e.name,
       e.group,
       stage
-        ? e.startTime || ""
+        ? [e.startTime, e.endTime].filter(Boolean).join("〜")
         : e.category === "kitchen"
           ? "マップに記載"
           : `${e.floor !== undefined ? e.floor + "階 " : ""}${e.room}\n${e.location}`,

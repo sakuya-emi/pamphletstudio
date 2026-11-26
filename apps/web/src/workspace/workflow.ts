@@ -175,6 +175,9 @@ export function editTargets(nodes: Node[]): Node[] {
       n.source.id,
       n.source.field,
       n.objectId,
+      n.source.field === "surveyUrl" && n.kind === "text" && !n.editorOnly
+        ? "url-label"
+        : "",
     ]);
     const previous = targets.get(key);
     if (!previous) targets.set(key, { ...n });

@@ -826,7 +826,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
       issues.push({
         level: "warning",
         adId: ad.id,
-        message: `未配置広告：${p.sponsors.find((s) => s.id === ad.sponsorId)?.name || "企業名未設定"}`,
+        message: `未配置広告：${p.sponsors.find((s) => s.id === ad.sponsorId)?.name || "企業名未設定"}。${pages.some((pg) => pg.slots.some((slot) => slot.size === ad.size && !slot.adId)) ? "同じ規格の空き枠があります。広告タブで配置先を選んでください。" : "同じ規格の空き枠がありません。広告タブで広告ページを追加して配置できます。"}`,
       });
   if (!p.coverId && pages.some((a) => a.template === "cover"))
     issues.push({

@@ -1,3 +1,4 @@
+import { normalizeSurveyUrl } from "./survey-url";
 import { festivalDate } from "./festival-date";
 import {
   setCategory,
@@ -57,6 +58,12 @@ export function record(
   >;
 }
 export function writeSource(p: Project, s: DataSource, value: string) {
+  if (s.field === "surveyUrl") {
+    const target = record(p, s);
+    if (!target) throw new Error("アンケートページが見つかりません。");
+    target.surveyUrl = value.trim() ? normalizeSurveyUrl(value) : "";
+    return;
+  }
   if (s.type === "project" && s.field === "date") {
     const parsed = festivalDate(value);
     p.date = parsed?.label ?? value;

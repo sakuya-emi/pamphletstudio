@@ -47,59 +47,48 @@ export function posterPages(c: Context): Node[][] {
         (c.block.posterMode === "single" || e.posterRequired !== false),
     ),
     pages: Node[][] = [];
-  if (c.block.posterMode === "single")
-    return events.length
-      ? events.map((e): Node[] =>
-          e.posterRequired === false
-            ? [
-                {
-                  ...text(
-                    c.left,
-                    30,
-                    c.width,
-                    e.name,
-                    5,
-                    c.project.theme.ink,
-                    true,
-                  ),
-                  source: { type: "event", id: e.id, field: "name" },
-                },
-                text(
-                  c.left,
-                  42,
-                  c.width,
-                  [e.group, e.location, e.startTime, e.endTime]
-                    .filter(Boolean)
-                    .join(" ／ "),
-                  3,
-                  c.project.theme.ink,
-                ),
-              ]
-            : !e.assetId
-              ? adPlaceholder(
-                  { x: c.left, y: 25, w: c.width, h: 172 },
-                  "ポスター未登録：" + e.name,
-                ).map((n) => ({
-                  ...n,
-                  source: {
-                    type: "event" as const,
-                    id: e.id,
-                    field: "assetId",
-                  },
-                }))
-              : [
-                  {
-                    kind: "asset",
-                    assetId: e.assetId!,
-                    x: c.left,
-                    y: 25,
-                    w: c.width,
-                    h: 172,
-                    source: { type: "event", id: e.id, field: "assetId" },
-                  },
-                ],
-        )
-      : [[]];
+  if (c.block.posterMode === "single") {
+    const result: Node[][] = [];
+    let textRun: Event[] = [];
+    const flush = () => {
+      if (textRun.length) {
+        result.push(
+          ...eventPages({ ...c, project: { ...c.project, events: textRun } }),
+        );
+        textRun = [];
+      }
+    };
+    for (const e of events) {
+      if (e.posterRequired === false) {
+        textRun.push(e);
+        continue;
+      }
+      flush();
+      result.push(
+        e.assetId
+          ? [
+              {
+                kind: "asset",
+                assetId: e.assetId,
+                x: c.left,
+                y: 25,
+                w: c.width,
+                h: 172,
+                source: { type: "event", id: e.id, field: "assetId" },
+              },
+            ]
+          : adPlaceholder(
+              { x: c.left, y: 25, w: c.width, h: 172 },
+              "ポスター未登録：" + e.name,
+            ).map((n) => ({
+              ...n,
+              source: { type: "event" as const, id: e.id, field: "assetId" },
+            })),
+      );
+    }
+    flush();
+    return result.length ? result : [[]];
+  }
   for (let i = 0; i < events.length; i += 4)
     pages.push(
       posterNodes(

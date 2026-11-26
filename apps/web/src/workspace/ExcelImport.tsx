@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import type { Project } from "../../../../packages/core/model";
 import {
   interpretRows,
+  surveyConflictRows,
   inspectImportTarget,
   importDecision,
   importAdd,
@@ -98,8 +99,16 @@ export function ExcelImport({
       ),
     [project, rows, plans],
   );
+  const surveyConflicts = surveyConflictRows(project, rows);
   const decisions = plans.map((plan, i) =>
-    importDecision(rows[i], plan, duplicates[i], inspected[i], choices[i]),
+    surveyConflicts.has(i)
+      ? { state: "skip" as const, target: "" }
+      : importDecision(rows[i], plan, duplicates[i], inspected[i], choices[i]),
+  );
+  const unresolvedSurvey = rows.some(
+    (row, i) =>
+      row.sheet === "アンケート" &&
+      ["review", "error"].includes(decisions[i].state),
   );
   const effective = decisions.map((d) =>
     d.state === "add" || d.state === "update" ? d.target : "",
@@ -229,6 +238,12 @@ export function ExcelImport({
     setError(next.length ? "" : "登録できる行がありません。");
   };
   function apply() {
+    if (unresolvedSurvey) {
+      setError(
+        "アンケートの登録方法を選択してください。登録しない場合も、明示的に「登録しない」を選んでください。",
+      );
+      return;
+    }
     try {
       update((p) => {
         const removed = new Set(
@@ -398,6 +413,16 @@ export function ExcelImport({
           「アンケート」シートのURLから、誌面とPDFのQRコードを自動生成します。QR画像の登録は不要です。既存URLがある場合は変更前後を確認し、「更新」を選んでください。
         </p>
       )}
+      {unresolvedSurvey && (
+        <p role="alert">
+          アンケートが未確定のため、まだ登録できません。既存URLや文章との差分を確認し、各アンケート行で「更新」を選んでください。取り込まない場合は「登録しない」を選ぶと進めます。
+        </p>
+      )}
+      {surveyConflicts.size > 0 && (
+        <p role="status">
+          アンケートページのURL・見出し・本文は「アンケート」シートを優先します。他シートのアンケート案内行は重複更新しません。
+        </p>
+      )}
       {ignored.length > 0 && <p>対象外のシート：{ignored.join("、")}</p>}
       {rows.some((r) => r.sample) && (
         <p>
@@ -539,7 +564,11 @@ export function ExcelImport({
                                 ? "（ファイル内重複候補）"
                                 : ""}
                           </span>
-                          {p.error ? (
+                          {surveyConflicts.has(i) ? (
+                            <p>
+                              アンケートの内容は「アンケート」シートで管理されています。この行は登録しません。
+                            </p>
+                          ) : p.error ? (
                             <span>{p.error}</span>
                           ) : (
                             <select
@@ -633,6 +662,7 @@ export function ExcelImport({
             className="primary"
             disabled={
               loading ||
+              unresolvedSurvey ||
               !count ||
               badTargets ||
               unresolvedReplacement ||

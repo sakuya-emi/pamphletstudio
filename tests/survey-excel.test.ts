@@ -57,7 +57,11 @@ it("Excel survey URL creates a vector QR on the existing notice without duplicat
     readFile("public/fonts/NotoSansCJKjp-Medium.ttf"),
     readFile("public/fonts/NotoSansCJKjp-Bold.ttf"),
   ]);
-  const output = await exportPDF(p, { medium, bold });
+  const progress: number[] = [];
+  const output = await exportPDF(p, { medium, bold }, (n) => progress.push(n));
+  expect(progress).toContain(95);
+  expect(progress.at(-1)).toBe(100);
+  expect(progress.every((n, i) => i === 0 || n >= progress[i - 1])).toBe(true);
   expect((await PDFDocument.load(output.bytes)).getPageCount()).toBe(
     output.layout.pages.length,
   );
