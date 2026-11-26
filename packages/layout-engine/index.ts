@@ -59,7 +59,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
     )
       issues.push({
         level: "warning",
-        message: `ポスター未登録：${b.title}（外部・特別企画）`,
+        message: `ポスター未登録：${b.title}（外部・特別企画）。企画データは登録済みです。「外部・特別企画」タブで画像を登録するかポスター要否を「不要」にしてください。`,
       });
   // Explicit assignments reserve ads before automatic placement, irrespective of page order.
   const reserved = new Set(
@@ -237,7 +237,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
           );
           const per = Math.floor(
             (192 -
-              (block.assetId &&
+              ((block.assetId || block.externalEvent) &&
               !(block.externalEvent && block.posterRequired === false)
                 ? 97
                 : 30)) /
@@ -261,7 +261,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
               n.push({
                 ...text(
                   c.left,
-                  (block.assetId &&
+                  ((block.assetId || block.externalEvent) &&
                   !(block.externalEvent && block.posterRequired === false)
                     ? 97
                     : 30) +
@@ -301,7 +301,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
     ) {
       chunks[0]?.push(
         ...adPlaceholder(
-          { x: c.left, y: 120, w: c.width, h: 65 },
+          { x: c.left, y: 25, w: c.width, h: 65 },
           "ポスター未登録：" + block.title,
         ).map((n) => ({
           ...n,
@@ -786,6 +786,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
         });
       if (
         node.kind === "text" &&
+        !node.editorOnly &&
         measure(node.text, node.size, node.bold) > node.w + 0.3
       )
         issues.push({

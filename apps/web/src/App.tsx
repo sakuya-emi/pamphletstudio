@@ -1,4 +1,8 @@
-import { outputPages, automaticBlankCounts } from "./workspace/workflow";
+import {
+  outputPages,
+  automaticBlankCounts,
+  sourcePage,
+} from "./workspace/workflow";
 import { ExcelImport } from "./workspace/ExcelImport";
 import { MediaIntake } from "./workspace/MediaIntake";
 import {
@@ -1446,16 +1450,17 @@ export function App() {
           onSelect={setEventId}
           focusSource={sheetSource}
           onReveal={(source) => {
-            const pg = layout.pages.find((pg) =>
-              pg.nodes.some(
-                (n) =>
-                  n.source?.type === source.type && n.source?.id === source.id,
-              ),
-            );
+            const pg =
+              sourcePage(layout, source) ??
+              (source.type === "ad" ? layout.pages[0] : undefined);
             if (pg) {
               setSelected(pg.id);
               setStep(3);
-              setInputTarget({ blockId: pg.blockId, source });
+              setInputTarget(
+                source.type === "ad" ? null : { blockId: pg.blockId, source },
+              );
+              setTab(source.type === "ad" ? "ads" : "page");
+              setHideInspector(false);
               setDataMode(false);
             } else
               setNotice("この内容はまだパンフレットに配置されていません。");

@@ -23,6 +23,7 @@ import type { Layout } from "../../../../packages/layout-engine";
 import "./workspace.css";
 type Sheet =
   | "events"
+  | "external"
   | "stage"
   | "studentStage"
   | "food"
@@ -65,6 +66,16 @@ const stageCols: Col[] = [
   { key: "assetId", label: "ポスター", type: "asset" },
 ];
 const cols: Record<Exclude<Sheet, "assets">, Col[]> = {
+  external: [
+    { key: "title", label: "企画名" },
+    { key: "body", label: "本文・開催情報" },
+    {
+      key: "posterRequired",
+      label: "ポスター要否（要ならチェック）",
+      type: "boolean",
+    },
+    { key: "assetId", label: "ポスター", type: "asset" },
+  ],
   events: general,
   food: general,
   stage: stageCols,
@@ -116,6 +127,7 @@ const eventSheets: Sheet[] = [
 const sheetCategory = (sheet: Sheet): EventCategory =>
   sheet === "events" ? "student" : (sheet as EventCategory);
 const names: Record<Sheet, string> = {
+  external: "外部・特別企画",
   events: "学生企画",
   food: "模擬店",
   studentStage: "学生ステージ企画",
@@ -181,15 +193,18 @@ export function DataWorkspace({
         ? ((eventCategory(e) === "student"
             ? "events"
             : eventCategory(e)) as Sheet)
-        : focusSource.type === "ad"
-          ? "ads"
-          : focusSource.type === "staff"
-            ? "staff"
-            : focusSource.type === "chapter"
-              ? "chapters"
-              : focusSource.type === "sponsor"
-                ? "sponsors"
-                : "common",
+        : focusSource.type === "block" &&
+            p.blocks.some((b) => b.id === focusSource.id && b.externalEvent)
+          ? "external"
+          : focusSource.type === "ad"
+            ? "ads"
+            : focusSource.type === "staff"
+              ? "staff"
+              : focusSource.type === "chapter"
+                ? "chapters"
+                : focusSource.type === "sponsor"
+                  ? "sponsors"
+                  : "common",
     );
   }, [focusSource]);
   const commonSources = useMemo(
@@ -226,6 +241,7 @@ export function DataWorkspace({
       : {
           type: (
             {
+              external: "block",
               events: "event",
               stage: "event",
               studentStage: "event",
@@ -249,11 +265,13 @@ export function DataWorkspace({
             label: r.label,
             value: readSource(p, r.source),
           }))
-        : eventSheets.includes(sheet)
-          ? p.events.filter((e) => eventCategory(e) === sheetCategory(sheet))
-          : sheet === "ads"
-            ? p.ads.map((a) => ({ ...a, companyName: adCompany(p, a.id) }))
-            : p[sheet as "sponsors"]) as unknown as Record<string, unknown>[];
+        : sheet === "external"
+          ? p.blocks.filter((b) => b.externalEvent)
+          : eventSheets.includes(sheet)
+            ? p.events.filter((e) => eventCategory(e) === sheetCategory(sheet))
+            : sheet === "ads"
+              ? p.ads.map((a) => ({ ...a, companyName: adCompany(p, a.id) }))
+              : p[sheet as "sponsors"]) as unknown as Record<string, unknown>[];
     list = list.filter((r) =>
       Object.values(r).join(" ").toLowerCase().includes(search.toLowerCase()),
     );
@@ -304,6 +322,8 @@ export function DataWorkspace({
         q.kitchenMenus = q.kitchenMenus?.filter(
           (m) => !selected.includes(m.eventId),
         );
+      } else if (sheet === "external") {
+        q.blocks = q.blocks.filter((b) => !selected.includes(b.id));
       } else if (sheet === "sponsors") {
         if (q.ads.some((a) => selected.includes(a.sponsorId)))
           throw new Error(
@@ -610,6 +630,7 @@ export function DataWorkspace({
           <table ref={table} role="grid" aria-label={names[sheet]}>
             <thead>
               <tr>
+                {sheet === "ads" && <th>広告の配置先</th>}
                 <th>選択</th>
                 {columns.map((c) => (
                   <th
@@ -639,7 +660,7 @@ export function DataWorkspace({
                 const id = String(r.id);
                 const linkedPages =
                   eventSheets.includes(sheet) ||
-                  ["staff", "ads", "sponsors"].includes(sheet)
+                  ["staff", "ads", "sponsors", "external"].includes(sheet)
                     ? layout.pages.filter(
                         (pg) =>
                           pg.nodes.some(
@@ -649,23 +670,77 @@ export function DataWorkspace({
                               n.source.type ===
                                 (eventSheets.includes(sheet)
                                   ? "event"
-                                  : sheet === "ads"
-                                    ? "ad"
-                                    : sheet === "staff"
-                                      ? "staff"
-                                      : "sponsor"),
+                                  : sheet === "external"
+                                    ? "block"
+                                    : sheet === "ads"
+                                      ? "ad"
+                                      : sheet === "staff"
+                                        ? "staff"
+                                        : "sponsor"),
                           ) ||
                           (sheet === "ads" &&
-                            pg.slots.some((s) => s.adId === id)),
+                            pg.slots.some((s) => s.adId === id)) ||
+                          (sheet === "external" && pg.blockId === id),
                       )
                     : undefined;
                 return (
                   <tr key={id} className={selectedId === id ? "current" : ""}>
+                    {sheet === "ads" && (
+                      <td>
+                        <select
+                          aria-label={
+                            "広告の配置先 " + (r.companyName || "名称未設定")
+                          }
+                          value={
+                            layout.pages
+                              .flatMap((pg) => pg.slots)
+                              .find((slot) => slot.adId === id)?.key ?? ""
+                          }
+                          onChange={(e) => {
+                            const key = e.target.value;
+                            if (!key) return;
+                            update((p) => {
+                              for (const previous of Object.keys(p.assignments))
+                                if (p.assignments[previous] === id)
+                                  delete p.assignments[previous];
+                              p.assignments[key] = id;
+                            });
+                          }}
+                        >
+                          <option value="">未配置</option>
+                          {layout.pages.flatMap((pg) =>
+                            pg.slots
+                              .filter((slot) => slot.size === r.size)
+                              .map((slot, i) => (
+                                <option
+                                  key={slot.key}
+                                  value={slot.key}
+                                  disabled={!!slot.adId && slot.adId !== id}
+                                >
+                                  PDF {pg.physical}ページ：{pg.title}／枠{i + 1}
+                                  {slot.adId && slot.adId !== id
+                                    ? "（使用中）"
+                                    : ""}
+                                </option>
+                              )),
+                          )}
+                        </select>
+                        <button
+                          onClick={() =>
+                            onReveal?.({ type: "ad", id, field: "assetId" })
+                          }
+                        >
+                          広告タブで配置・ページ追加
+                        </button>
+                      </td>
+                    )}
                     <td>
                       {onReveal && (
                         <button
                           aria-label={"パンフレットで確認 " + (ri + 1)}
-                          disabled={linkedPages?.length === 0}
+                          disabled={
+                            sheet !== "ads" && linkedPages?.length === 0
+                          }
                           title={linkedPages
                             ?.map(
                               (pg) =>
@@ -682,13 +757,15 @@ export function DataWorkspace({
                                 : {
                                     type: eventSheets.includes(sheet)
                                       ? "event"
-                                      : sheet === "ads"
-                                        ? "ad"
-                                        : sheet === "staff"
-                                          ? "staff"
-                                          : sheet === "chapters"
-                                            ? "chapter"
-                                            : "sponsor",
+                                      : sheet === "external"
+                                        ? "block"
+                                        : sheet === "ads"
+                                          ? "ad"
+                                          : sheet === "staff"
+                                            ? "staff"
+                                            : sheet === "chapters"
+                                              ? "chapter"
+                                              : "sponsor",
                                     id,
                                     field: "name",
                                   },
@@ -698,7 +775,9 @@ export function DataWorkspace({
                           {linkedPages
                             ? linkedPages.length
                               ? "掲載先を見る"
-                              : "未掲載"
+                              : sheet === "ads"
+                                ? "広告を配置する"
+                                : "未掲載"
                             : "誌面へ"}
                         </button>
                       )}

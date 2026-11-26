@@ -1,3 +1,4 @@
+import { eventCategory } from "../../../../packages/core/registration";
 import type { Project } from "../../../../packages/core/model";
 import type { LayoutPage } from "../../../../packages/layout-engine";
 import type { InputTarget } from "./ProductionEditor";
@@ -67,9 +68,32 @@ export function inputGuides(p: Project, page: LayoutPage): InputGuide[] {
     const assets = page.nodes.filter(
       (n) => n.source?.type === "event" && n.kind === "asset",
     );
-    if (!assets.length)
-      add("poster", "＋ ポスターを登録", t === "events" ? 60 : 32, 55);
-    else add("poster", "＋ ポスターを登録", 199, 7);
+    const ids = new Set(
+      page.nodes
+        .filter((n) => n.source?.type === "event")
+        .map((n) => n.source!.id),
+    );
+    const candidates = p.events.filter(
+      (e) =>
+        e.published !== false &&
+        e.category !== "kitchen" &&
+        e.posterRequired !== false &&
+        (ids.size
+          ? ids.has(e.id)
+          : !b.eventCategory || eventCategory(e) === b.eventCategory),
+    );
+    const hasTarget = page.nodes.some(
+      (n) => n.source?.type === "event" && n.source.field === "assetId",
+    );
+    const emptyScope =
+      !ids.size &&
+      !p.events.some(
+        (e) =>
+          e.published !== false &&
+          (!b.eventCategory || eventCategory(e) === b.eventCategory),
+      );
+    if ((candidates.length || emptyScope) && !hasTarget)
+      add("poster", "＋ ポスターを登録", 199, 7);
   }
   if (t === "stage")
     add(
@@ -99,7 +123,11 @@ export function inputGuides(p: Project, page: LayoutPage): InputGuide[] {
     });
   let missingSlot = 0;
   const boxes = page.nodes.filter(
-    (n) => n.kind === "rect" && n.componentKind === "ad-placeholder",
+    (n) =>
+      n.kind === "rect" &&
+      n.componentKind === "ad-placeholder" &&
+      n.source?.type !== "event" &&
+      n.source?.type !== "block",
   );
   for (const slot of page.slots) {
     const ad = p.ads.find((a) => a.id === slot.adId);

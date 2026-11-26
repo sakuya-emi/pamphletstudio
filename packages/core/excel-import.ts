@@ -356,11 +356,13 @@ export function planRow(p: Project, row: ImportRow): RowAction {
         const previous = (q.kitchenMenus ?? [])
           .filter((m) => m.eventId === x.id)
           .sort((a, b) => a.order - b.order);
-        [b, c, d, e, f].forEach((name, i) => {
-          if (!name.trim()) return;
-          if (previous[i]) previous[i].name = name;
-          else addMenu(q, x.id, name);
-        });
+        [b, c, d, e, f]
+          .filter((name) => name.trim())
+          .forEach((name, i) => {
+            if (!name.trim()) return;
+            if (previous[i]) previous[i].name = name;
+            else addMenu(q, x.id, name);
+          });
       } else {
         if (b) x.group = b;
         if (c) x.building = c;
@@ -615,8 +617,10 @@ function comparisonFields(
     return {
       ...event,
       menus:
-        p.kitchenMenus?.filter((m) => m.eventId === id).map((m) => m.name) ??
-        [],
+        p.kitchenMenus
+          ?.filter((m) => m.eventId === id)
+          .sort((a, b) => a.order - b.order)
+          .map((m) => m.name) ?? [],
     };
   if (row.sheet === "協賛企業")
     return {

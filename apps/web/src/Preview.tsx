@@ -1,4 +1,4 @@
-import { sourceEditLabel } from "./workspace/workflow";
+import { sourceEditLabel, editTargets } from "./workspace/workflow";
 import { resolveAsset } from "../../../packages/core/rule-marks";
 import { inputGuides } from "./workspace/inputGuides";
 import type { InputTarget } from "./workspace/ProductionEditor";
@@ -142,23 +142,41 @@ export function Preview({
         ))}
       {onEdit &&
         !thumb &&
-        page.nodes
-          .filter((n) => n.source)
-          .map((n, i) => (
-            <rect
-              className="direct-hit"
-              key={"edit" + i}
-              x={n.x}
-              y={n.y}
-              width={n.w}
-              height={n.h}
-              fill="transparent"
-              tabIndex={0}
-              role="button"
-              aria-label={sourceEditLabel(project, n.source!)}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectSource?.(n.source!);
+        editTargets(page.nodes).map((n, i) => (
+          <rect
+            className="direct-hit"
+            key={"edit" + i}
+            x={n.x}
+            y={n.y}
+            width={n.w}
+            height={n.h}
+            fill="transparent"
+            tabIndex={0}
+            role="button"
+            aria-label={sourceEditLabel(project, n.source!)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectSource?.(n.source!);
+              if (n.source!.type === "pageNumber") {
+                if (onInput)
+                  onInput({
+                    blockId: page.blockId,
+                    source: n.source!,
+                    componentKind: n.componentKind,
+                    objectId: n.objectId,
+                  });
+                else onNumber?.();
+              } else if (onInput)
+                onInput({
+                  blockId: page.blockId,
+                  source: n.source!,
+                  componentKind: n.componentKind,
+                  objectId: n.objectId,
+                });
+              else setActive(n);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
                 if (n.source!.type === "pageNumber") {
                   if (onInput)
                     onInput({
@@ -176,30 +194,10 @@ export function Preview({
                     objectId: n.objectId,
                   });
                 else setActive(n);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  if (n.source!.type === "pageNumber") {
-                    if (onInput)
-                      onInput({
-                        blockId: page.blockId,
-                        source: n.source!,
-                        componentKind: n.componentKind,
-                        objectId: n.objectId,
-                      });
-                    else onNumber?.();
-                  } else if (onInput)
-                    onInput({
-                      blockId: page.blockId,
-                      source: n.source!,
-                      componentKind: n.componentKind,
-                      objectId: n.objectId,
-                    });
-                  else setActive(n);
-                }
-              }}
-            />
-          ))}
+              }
+            }}
+          />
+        ))}
       {!thumb &&
         onInput &&
         inputGuides(project, page).map((g, i) => (

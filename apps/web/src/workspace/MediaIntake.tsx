@@ -66,6 +66,23 @@ export function MediaIntake({
           <p>Excelの取り込みが完了しました。次に画像を登録します。</p>
         )}
         <p>{summary.breakdown}</p>
+        <details>
+          <summary>登録対象一覧（{items.length}件）</summary>
+          <ul>
+            {items.map((target, i) => (
+              <li key={target.collection + target.id}>
+                <button
+                  onClick={() => {
+                    move(i);
+                    setStarted(true);
+                  }}
+                >
+                  {target.label}：{target.title || "名称未入力"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
         <p>
           表紙を含み、非掲載の企画と「ポスター不要」の企画を除いた件数です。Excelや掲載設定を変えると件数も変わります。
         </p>
@@ -128,6 +145,21 @@ export function MediaIntake({
         {item.title || "名称未入力"}
       </h2>
       <p>{item.detail}</p>
+      <label>
+        画像の登録先
+        <select
+          aria-label="画像の登録先"
+          value={index}
+          disabled={busy}
+          onChange={(e) => move(Number(e.target.value))}
+        >
+          {items.map((target, i) => (
+            <option key={target.collection + target.id} value={i}>
+              {i + 1}. {target.label}：{target.title}
+            </option>
+          ))}
+        </select>
+      </label>
       <p>
         {summary.breakdown} ／ 合計{summary.total}件・未登録{summary.missing}件
       </p>

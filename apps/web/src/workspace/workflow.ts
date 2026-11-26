@@ -1,4 +1,7 @@
-import type { LayoutPage } from "../../../../packages/layout-engine/types";
+import type {
+  LayoutPage,
+  Node,
+} from "../../../../packages/layout-engine/types";
 import type { Project } from "../../../../packages/core/model";
 import {
   adCompany,
@@ -69,7 +72,11 @@ export function mediaItems(project: Project) {
         ],
         assetId: a.assetId,
       })),
-  ];
+  ].sort(
+    (a, b) =>
+      ["表紙", "ポスター", "店舗画像", "広告画像"].indexOf(a.label) -
+      ["表紙", "ポスター", "店舗画像", "広告画像"].indexOf(b.label),
+  );
 }
 export function mediaSummary(project: Project) {
   const items = mediaItems(project);
@@ -122,7 +129,9 @@ export function sourceEditLabel(project: Project, source: DataSource) {
     timeRange: "開催時刻",
     title: "見出し",
     body: "本文",
-    assetId: "画像",
+    assetId: "画像1",
+    secondAssetId: "画像2",
+    thirdAssetId: "画像3",
     coverId: "表紙画像",
     logoId: "大学ロゴ",
     websiteUrl: "大学ウェブサイトのURL",
@@ -141,7 +150,9 @@ export function sourceEditLabel(project: Project, source: DataSource) {
       : source.type === "pageNumber"
         ? "ページ番号"
         : (names[source.field] ??
-          (source.field.startsWith("bodyLine:") ? "本文の項目" : "内容"));
+          (source.field.startsWith("bodyLine:")
+            ? `本文の項目${Number(source.field.split(":")[1]) + 1}`
+            : "内容"));
   const record =
     source.type === "chapter"
       ? project.chapters.find((x) => x.id === source.id)?.name
@@ -153,4 +164,44 @@ export function sourceEditLabel(project: Project, source: DataSource) {
             ? project.staff.find((x) => x.id === source.id)?.name
             : undefined;
   return `${title}を編集${record ? "：" + record : ""}`;
+}
+
+export function editTargets(nodes: Node[]): Node[] {
+  const targets = new Map<string, Node>();
+  for (const n of nodes) {
+    if (!n.source) continue;
+    const key = JSON.stringify([
+      n.source.type,
+      n.source.id,
+      n.source.field,
+      n.objectId,
+    ]);
+    const previous = targets.get(key);
+    if (!previous) targets.set(key, { ...n });
+    else {
+      const x = Math.min(previous.x, n.x),
+        y = Math.min(previous.y, n.y);
+      targets.set(key, {
+        ...previous,
+        x,
+        y,
+        w: Math.max(previous.x + previous.w, n.x + n.w) - x,
+        h: Math.max(previous.y + previous.h, n.y + n.h) - y,
+      });
+    }
+  }
+  return [...targets.values()];
+}
+export function sourcePage(
+  layout: { pages: LayoutPage[] },
+  source: DataSource,
+) {
+  return layout.pages.find(
+    (pg) =>
+      (source.type === "ad" && pg.slots.some((s) => s.adId === source.id)) ||
+      (source.type === "block" && pg.blockId === source.id) ||
+      pg.nodes.some(
+        (n) => n.source?.type === source.type && n.source.id === source.id,
+      ),
+  );
 }
