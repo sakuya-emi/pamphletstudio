@@ -1,3 +1,4 @@
+import { normalizeSurveyUrl } from "../core/survey-url";
 import { defaultRuleMark } from "../core/rule-marks";
 import { festivalDate } from "../core/festival-date";
 import qrCode from "qrcode-generator";
@@ -20,10 +21,7 @@ export function surveyQr(
   y: number,
   side: number,
 ): Node[] {
-  if (url.length > 2048) throw new Error("URLが長すぎます。");
-  const parsed = new URL(url);
-  if (!["http:", "https:"].includes(parsed.protocol))
-    throw new Error("http/https のURLを入力してください。");
+  const parsed = new URL(normalizeSurveyUrl(url));
   const key = JSON.stringify([parsed.href, x, y, side]);
   let d = qrPaths.get(key);
   if (d === undefined) {

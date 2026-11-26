@@ -337,10 +337,10 @@ export function ExcelImport({
       )}
       <p>
         <a
-          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v2.xlsx`}
+          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v3.xlsx`}
           download
         >
-          Excel雛形（ポスター要否列つき）をダウンロード
+          Excel雛形（アンケートURL・ポスター要否列つき）をダウンロード
         </a>
       </p>
       <button
@@ -391,6 +391,11 @@ export function ExcelImport({
       ) && (
         <p>
           同じ内容・似た見出しのお知らせが既にあります。重複ページを作らないため、「変更前と変更後」を確認して既存ページを更新するか「登録しない」を選んでください。
+        </p>
+      )}
+      {rows.some((row) => row.sheet === "アンケート") && (
+        <p>
+          「アンケート」シートのURLから、誌面とPDFのQRコードを自動生成します。QR画像の登録は不要です。既存URLがある場合は変更前後を確認し、「更新」を選んでください。
         </p>
       )}
       {ignored.length > 0 && <p>対象外のシート：{ignored.join("、")}</p>}

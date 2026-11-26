@@ -17,7 +17,7 @@ import {
 import { webStorage } from "../packages/project-storage";
 import { layoutProject } from "../packages/layout-engine";
 
-it("Excelの14種類の見出しを認識し、説明行を取り込まない", () => {
+it("Excelの15種類の見出しを認識し、説明行を取り込まない", () => {
   for (const [sheet, headers] of Object.entries(sheets))
     expect(
       interpretRows(
@@ -26,7 +26,7 @@ it("Excelの14種類の見出しを認識し、説明行を取り込まない", 
         true,
       ),
     ).toEqual([]);
-  expect(Object.keys(sheets)).toHaveLength(14);
+  expect(Object.keys(sheets)).toHaveLength(15);
 });
 it("列順・空欄・改行を維持し、表示と同じ企画データへ登録する", () => {
   const p = createFestivalProject();

@@ -1,3 +1,4 @@
+import { normalizeSurveyUrl } from "./survey-url";
 import { type Project, type AdSize, insertBlock } from "./model";
 import {
   addAd,
@@ -42,6 +43,7 @@ export const sheets = {
   スタッフ: ["分類", "氏名"],
   "章・インデックス": ["章名"],
   基本情報: ["項目", "内容"],
+  アンケート: ["アンケートURL", "見出し", "本文"],
   挨拶: ["肩書", "氏名", "本文"],
   "お知らせ・注意事項": ["種類", "見出し", "本文"],
   "外部・特別企画": [
@@ -69,6 +71,9 @@ const norm = (s: string) =>
     .trim()
     .replace(/[\s　]+/g, "");
 const aliases: Record<string, string> = {
+  URL: "アンケートURL",
+  回答URL: "アンケートURL",
+  フォームURL: "アンケートURL",
   イベント名: "企画名",
   主催団体: "団体名",
   開始時間: "開始時刻",
@@ -202,7 +207,11 @@ export function interpretRows(
     if (/^\s*(?:※|入力例[：:]|記入例[：:]|注記[：:])/.test(r[0] ?? ""))
       continue;
     const cells = indices.map((n) => r[n] ?? "");
-    if (["挨拶", "お知らせ・注意事項", "ページ用テキスト"].includes(sheet))
+    if (
+      ["挨拶", "お知らせ・注意事項", "ページ用テキスト", "アンケート"].includes(
+        sheet,
+      )
+    )
       cells[2] = cells[2].replace(/\\n/g, "\n");
     if (sheet === "スタッフ" && firstHeader < 0 && r.length === 1) {
       cells[1] = cells[0];
@@ -237,6 +246,13 @@ export function interpretRows(
       continue;
     if (cells.every((c) => !c.trim())) continue;
     let error: string | undefined;
+    if (sheet === "アンケート") {
+      try {
+        cells[0] = normalizeSurveyUrl(cells[0]);
+      } catch (e) {
+        error = e instanceof Error ? e.message : String(e);
+      }
+    }
     const posterIndex = names.indexOf("ポスター要否" as never);
     if (
       posterIndex >= 0 &&
@@ -329,7 +345,36 @@ export function planRow(p: Project, row: ImportRow): RowAction {
     error: row.error,
   };
   const cat = categories[sheet];
-  if (cat) {
+  if (sheet === "アンケート") {
+    action.label = "アンケートQRコード";
+    action.candidates = p.blocks
+      .filter((block) => block.openingKind === "survey")
+      .map((block) => ({ id: block.id, label: block.title }));
+    action.requiresTarget = action.candidates.length > 0;
+    action.apply = (q, id) => {
+      const url = normalizeSurveyUrl(a);
+      if (id) {
+        const target = q.blocks.find(
+          (block) => block.id === id && block.openingKind === "survey",
+        );
+        if (!target) throw new Error("アンケートの掲載先が見つかりません。");
+        target.surveyUrl = url;
+        if (b.trim()) target.title = b;
+        if (c.trim()) target.body = c;
+      } else
+        insertBlock(q, {
+          id: nextRecordId(q),
+          template: "notice",
+          openingKind: "survey",
+          title: b.trim() || "アンケート",
+          body:
+            c.trim() ||
+            "ご来場ありがとうございます。QRコードを読み取ってアンケートへのご協力をお願いします。",
+          chapterId: q.chapters[0].id,
+          surveyUrl: url,
+        });
+    };
+  } else if (cat) {
     const same = p.events.filter(
       (x) => eventCategory(x) === cat && eq(x.name, a),
     );
@@ -572,6 +617,7 @@ export type ImportDifference = {
   after: unknown;
 };
 const fieldLabels: Record<string, string> = {
+  surveyUrl: "アンケートURL（QRコード）",
   posterRequired: "ポスター要否",
   university: "大学名",
   festival: "学園祭名",
