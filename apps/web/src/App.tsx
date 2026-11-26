@@ -2707,6 +2707,28 @@ export function App() {
                 )}
                 {tab === "events" && (
                   <>
+                    {project.blocks
+                      .filter((b) => b.externalEvent)
+                      .map((b) => (
+                        <Field
+                          key={b.id}
+                          label={b.title + "（外部・特別企画）ポスター要否"}
+                        >
+                          <select
+                            value={b.posterRequired === false ? "不要" : "要"}
+                            onChange={(e) =>
+                              update((p) => {
+                                p.blocks.find(
+                                  (x) => x.id === b.id,
+                                )!.posterRequired = e.target.value === "要";
+                              })
+                            }
+                          >
+                            <option>要</option>
+                            <option>不要</option>
+                          </select>
+                        </Field>
+                      ))}
                     <div className="eyebrow">CONTENT LIBRARY</div>
                     <h2>
                       企画・ポスター{" "}
@@ -2808,6 +2830,26 @@ export function App() {
                             eventId={event.id}
                             update={update}
                           />
+                        )}
+                        {event.category !== "kitchen" && (
+                          <Field label="ポスター要否">
+                            <select
+                              aria-label="企画のポスター要否"
+                              value={
+                                event.posterRequired === false ? "不要" : "要"
+                              }
+                              onChange={(e) =>
+                                update((p) => {
+                                  p.events.find(
+                                    (x) => x.id === event.id,
+                                  )!.posterRequired = e.target.value === "要";
+                                })
+                              }
+                            >
+                              <option>要</option>
+                              <option>不要</option>
+                            </select>
+                          </Field>
                         )}
                         {event.assetId && project.assets[event.assetId] && (
                           <img

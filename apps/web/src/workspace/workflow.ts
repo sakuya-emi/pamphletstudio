@@ -28,7 +28,11 @@ export function mediaItems(project: Project) {
       assetId: project.coverId,
     },
     ...project.events
-      .filter((e) => e.published !== false)
+      .filter(
+        (e) =>
+          e.published !== false &&
+          (eventCategory(e) === "kitchen" || e.posterRequired !== false),
+      )
       .sort(
         (a, b) =>
           Number(eventCategory(a) === "kitchen") -
@@ -41,6 +45,16 @@ export function mediaItems(project: Project) {
         label: eventCategory(e) === "kitchen" ? "店舗画像" : "ポスター",
         detail: [e.group, e.location].filter(Boolean).join(" · "),
         assetId: e.assetId,
+      })),
+    ...project.blocks
+      .filter((b) => b.externalEvent && b.posterRequired !== false)
+      .map((b) => ({
+        collection: "blocks" as const,
+        id: b.id,
+        title: b.title,
+        label: "ポスター",
+        detail: "外部・特別企画",
+        assetId: b.assetId,
       })),
     ...project.ads
       .filter((a) => a.published !== false)

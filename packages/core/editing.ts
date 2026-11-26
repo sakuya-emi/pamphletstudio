@@ -26,6 +26,8 @@ function bodyLineIndex(s: DataSource): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 export function readSource(p: Project, s: DataSource): string {
+  if (s.field === "posterRequired")
+    return record(p, s)?.posterRequired === false ? "不要" : "要";
   if (s.type === "ad" && s.field === "companyName") return adCompany(p, s.id);
   const r = record(p, s);
   const index = bodyLineIndex(s);
@@ -85,8 +87,8 @@ export function writeSource(p: Project, s: DataSource, value: string) {
       throw new Error("数値を入力してください。");
     r[s.field] =
       value === "" ? (s.field === "edition" ? 0 : undefined) : Number(value);
-  } else if (["published", "visible"].includes(s.field))
-    r[s.field] = !["false", "0", "非掲載", "非表示"].includes(value);
+  } else if (["published", "visible", "posterRequired"].includes(s.field))
+    r[s.field] = !["false", "0", "非掲載", "非表示", "不要"].includes(value);
   else r[s.field] = value;
 }
 export const newEvent = (): Event => ({

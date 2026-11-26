@@ -28,6 +28,7 @@ export interface Staff {
   published?: boolean;
 }
 export interface Event {
+  posterRequired?: boolean;
   category?: "student" | "food" | "kitchen" | "stage" | "studentStage";
   published?: boolean;
   order?: number;
@@ -73,6 +74,8 @@ export interface Asset {
   pdfPage?: number;
 }
 export interface Block {
+  externalEvent?: boolean;
+  posterRequired?: boolean;
   staffSpread?: boolean;
   eventCategory?: Event["category"];
   posterMode?: "single";
@@ -374,3 +377,5 @@ export function insertBlock(p: Project, b: Block) {
     p.pageOrder.splice(i < 0 ? p.pageOrder.length : i, 0, b.id + "/0");
   }
 }
+
+export const requiresPoster = (event: Event) => event.posterRequired !== false;

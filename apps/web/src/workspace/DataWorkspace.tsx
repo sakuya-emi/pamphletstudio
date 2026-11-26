@@ -46,12 +46,22 @@ const general: Col[] = [
   { key: "floor", label: "階数", type: "number" },
   { key: "room", label: "教室" },
   { key: "location", label: "詳細な場所" },
+  {
+    key: "posterRequired",
+    label: "ポスター要否（要ならチェック）",
+    type: "boolean",
+  },
   { key: "assetId", label: "ポスター", type: "asset" },
 ];
 const stageCols: Col[] = [
   { key: "name", label: "企画名" },
   { key: "startTime", label: "開始時刻" },
   { key: "endTime", label: "終了時刻" },
+  {
+    key: "posterRequired",
+    label: "ポスター要否（要ならチェック）",
+    type: "boolean",
+  },
   { key: "assetId", label: "ポスター", type: "asset" },
 ];
 const cols: Record<Exclude<Sheet, "assets">, Col[]> = {
@@ -184,6 +194,17 @@ export function DataWorkspace({
   }, [focusSource]);
   const commonSources = useMemo(
     () => [
+      ...p.blocks
+        .filter((b) => b.externalEvent)
+        .map((b) => ({
+          id: b.id + ":posterRequired",
+          label: b.title + "：ポスター要否（要／不要）",
+          source: {
+            type: "block",
+            id: b.id,
+            field: "posterRequired",
+          } as DataSource,
+        })),
       ...p.blocks.flatMap((b) => [
         {
           id: b.id + ":title",
@@ -239,7 +260,7 @@ export function DataWorkspace({
     if (filter && eventSheets.includes(sheet))
       list = list.filter(
         (r) =>
-          !r.assetId ||
+          (r.posterRequired !== false && !r.assetId) ||
           !r.name ||
           (["events", "food"].includes(sheet) && !r.building),
       );

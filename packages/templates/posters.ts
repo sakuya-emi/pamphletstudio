@@ -1,3 +1,6 @@
+import { eventPages } from "./events";
+import { adPlaceholder } from "./ads";
+import { text } from "../layout-engine/types";
 import { listingEvents, type Event } from "../core/model";
 import { type Context, type Node } from "../layout-engine/types";
 export function posterNodes(
@@ -10,38 +13,92 @@ export function posterNodes(
     gap = c.block.posterSpacing === "compact" ? 3 : 5,
     h = (bottom - top - gap * (rows - 1)) / rows,
     w = (c.width - gap) / 2;
-  return events.map((e, i) => {
+  return events.flatMap((e, i): Node[] => {
     const ph = h,
       pw = Math.min(w, ph * c.project.theme.posterAspect);
-    return {
-      kind: "asset" as const,
-      assetId: e.assetId!,
+    const box = {
       x: c.left + (i % 2) * (w + gap) + (w - pw) / 2,
       y: top + Math.floor(i / 2) * (h + gap),
       w: pw,
       h: ph,
-      source: { type: "event" as const, id: e.id, field: "assetId" },
     };
+    if (!e.assetId)
+      return adPlaceholder(box, "ポスター未登録：" + e.name).map((n) => ({
+        ...n,
+        source: { type: "event" as const, id: e.id, field: "assetId" },
+      }));
+    return [
+      {
+        kind: "asset" as const,
+        assetId: e.assetId!,
+        x: c.left + (i % 2) * (w + gap) + (w - pw) / 2,
+        y: top + Math.floor(i / 2) * (h + gap),
+        w: pw,
+        h: ph,
+        source: { type: "event" as const, id: e.id, field: "assetId" },
+      },
+    ];
   });
 }
 export function posterPages(c: Context): Node[][] {
   const events = listingEvents(c.project, c.block.eventCategory).filter(
-      (e) => e.assetId && e.category !== "kitchen",
+      (e) =>
+        e.category !== "kitchen" &&
+        (c.block.posterMode === "single" || e.posterRequired !== false),
     ),
     pages: Node[][] = [];
   if (c.block.posterMode === "single")
     return events.length
-      ? events.map((e) => [
-          {
-            kind: "asset",
-            assetId: e.assetId!,
-            x: c.left,
-            y: 25,
-            w: c.width,
-            h: 172,
-            source: { type: "event", id: e.id, field: "assetId" },
-          },
-        ])
+      ? events.map((e): Node[] =>
+          e.posterRequired === false
+            ? [
+                {
+                  ...text(
+                    c.left,
+                    30,
+                    c.width,
+                    e.name,
+                    5,
+                    c.project.theme.ink,
+                    true,
+                  ),
+                  source: { type: "event", id: e.id, field: "name" },
+                },
+                text(
+                  c.left,
+                  42,
+                  c.width,
+                  [e.group, e.location, e.startTime, e.endTime]
+                    .filter(Boolean)
+                    .join(" ／ "),
+                  3,
+                  c.project.theme.ink,
+                ),
+              ]
+            : !e.assetId
+              ? adPlaceholder(
+                  { x: c.left, y: 25, w: c.width, h: 172 },
+                  "ポスター未登録：" + e.name,
+                ).map((n) => ({
+                  ...n,
+                  source: {
+                    type: "event" as const,
+                    id: e.id,
+                    field: "assetId",
+                  },
+                }))
+              : [
+                  {
+                    kind: "asset",
+                    assetId: e.assetId!,
+                    x: c.left,
+                    y: 25,
+                    w: c.width,
+                    h: 172,
+                    source: { type: "event", id: e.id, field: "assetId" },
+                  },
+                ],
+        )
       : [[]];
   for (let i = 0; i < events.length; i += 4)
     pages.push(
@@ -51,13 +108,20 @@ export function posterPages(c: Context): Node[][] {
         c.project.referenceDesign ? 12 : 24,
       ),
     );
+  const textOnly = listingEvents(c.project, c.block.eventCategory).filter(
+    (e) => e.category !== "kitchen" && e.posterRequired === false,
+  );
+  if (textOnly.length)
+    pages.push(
+      ...eventPages({ ...c, project: { ...c.project, events: textOnly } }),
+    );
   return !pages.length && c.block.eventCategory ? [[]] : pages;
 }
 /** Measured content flow; never reduce an ad frame or poster below 60mm tall. */
 export function flowEvents(c: Context, tables: Node[][]): Node[][] {
   const pages = tables.map((n) => [...n]),
     posters = listingEvents(c.project, c.block.eventCategory).filter(
-      (e) => e.assetId && e.category !== "kitchen",
+      (e) => e.category !== "kitchen" && e.posterRequired !== false,
     );
   let taken = 0;
   const last = pages.at(-1),

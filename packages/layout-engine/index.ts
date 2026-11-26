@@ -39,6 +39,27 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
   const pages: LayoutPage[] = [],
     issues: Layout["issues"] = [],
     used = new Set<string>();
+  for (const e of p.events)
+    if (
+      e.published !== false &&
+      e.category !== "kitchen" &&
+      e.posterRequired !== false &&
+      (!e.assetId || !p.assets[e.assetId])
+    )
+      issues.push({
+        level: "warning",
+        message: `ポスター未登録：${e.name}。企画データは登録済みです。画像を登録するかポスター要否を「不要」にしてください。`,
+      });
+  for (const b of p.blocks)
+    if (
+      b.externalEvent &&
+      b.posterRequired !== false &&
+      (!b.assetId || !p.assets[b.assetId])
+    )
+      issues.push({
+        level: "warning",
+        message: `ポスター未登録：${b.title}（外部・特別企画）`,
+      });
   // Explicit assignments reserve ads before automatic placement, irrespective of page order.
   const reserved = new Set(
     Object.values(p.assignments).filter((a): a is string => !!a),
@@ -191,7 +212,8 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
           );
           if (styledBody) {
             chunks.push(
-              block.assetId
+              block.assetId &&
+                !(block.externalEvent && block.posterRequired === false)
                 ? [
                     {
                       kind: "asset",
@@ -213,12 +235,19 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
             measure,
           );
           const per = Math.floor(
-            (192 - (block.assetId ? 97 : 30)) /
+            (192 -
+              (block.assetId &&
+              !(block.externalEvent && block.posterRequired === false)
+                ? 97
+                : 30)) /
               (p.theme.fontSize * p.theme.lineHeight),
           );
           for (let i = 0; i < Math.max(1, lines.length); i += per) {
             const n: Node[] = [];
-            if (block.assetId)
+            if (
+              block.assetId &&
+              !(block.externalEvent && block.posterRequired === false)
+            )
               n.push({
                 kind: "asset",
                 assetId: block.assetId,
@@ -231,7 +260,10 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
               n.push({
                 ...text(
                   c.left,
-                  (block.assetId ? 97 : 30) +
+                  (block.assetId &&
+                  !(block.externalEvent && block.posterRequired === false)
+                    ? 97
+                    : 30) +
                     j * p.theme.fontSize * p.theme.lineHeight,
                   c.width,
                   s,
@@ -262,6 +294,21 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
     if (block.template === "events" && block.flowPosters)
       chunks = flowEvents(c, chunks);
     if (
+      block.externalEvent &&
+      block.posterRequired !== false &&
+      (!block.assetId || !p.assets[block.assetId])
+    ) {
+      chunks[0]?.push(
+        ...adPlaceholder(
+          { x: c.left, y: 120, w: c.width, h: 65 },
+          "ポスター未登録：" + block.title,
+        ).map((n) => ({
+          ...n,
+          source: { type: "block" as const, id: block.id, field: "assetId" },
+        })),
+      );
+    }
+    if (
       block.template === "stage" &&
       !design &&
       !p.blocks.some(
@@ -272,6 +319,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
         (e) =>
           (e.category === "stage" || e.category === "studentStage") &&
           e.published !== false &&
+          e.posterRequired !== false &&
           e.assetId,
       );
       for (let at = 0; at < posters.length; at += 4)

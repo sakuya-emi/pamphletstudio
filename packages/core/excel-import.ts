@@ -14,8 +14,16 @@ import {
 import { festivalDate } from "./festival-date";
 import { writeSource } from "./editing";
 
-const events = ["企画名", "団体名", "建物", "階数", "教室", "詳細な場所"];
-const stage = ["企画名", "開始時刻", "終了時刻"];
+const events = [
+  "企画名",
+  "団体名",
+  "建物",
+  "階数",
+  "教室",
+  "詳細な場所",
+  "ポスター要否",
+];
+const stage = ["企画名", "開始時刻", "終了時刻", "ポスター要否"];
 export const sheets = {
   学生企画: events,
   模擬店: events,
@@ -43,6 +51,7 @@ export const sheets = {
     "開始時刻",
     "終了時刻",
     "備考",
+    "ポスター要否",
   ],
   ページ用テキスト: ["掲載箇所", "見出し", "本文・項目"],
 } as const;
@@ -228,6 +237,12 @@ export function interpretRows(
       continue;
     if (cells.every((c) => !c.trim())) continue;
     let error: string | undefined;
+    const posterIndex = names.indexOf("ポスター要否" as never);
+    if (
+      posterIndex >= 0 &&
+      !["", "要", "不要"].includes(norm(cells[posterIndex]))
+    )
+      error = "ポスター要否は「要」または「不要」で指定してください。";
     if (sheet !== "スタッフ" && !cells[0].trim())
       error = names[0] + "が未入力です。";
     if (sheet === "学生企画" || sheet === "模擬店") {
@@ -312,6 +327,11 @@ export function planRow(p: Project, row: ImportRow): RowAction {
     action.apply = (q, id) => {
       const x = id ? q.events.find((x) => x.id === id)! : addEvent(q, cat);
       x.name = a;
+      if (cat !== "kitchen")
+        x.posterRequired =
+          norm(
+            row.cells[sheets[sheet].indexOf("ポスター要否" as never)] ?? "",
+          ) !== "不要";
       if (cat === "stage" || cat === "studentStage") {
         if (b) x.startTime = b;
         if (c) x.endTime = c;
@@ -469,10 +489,16 @@ export function planRow(p: Project, row: ImportRow): RowAction {
       ]
         .filter(Boolean)
         .join("\n");
+      const posterRequired = norm(row.cells[6] ?? "") !== "不要";
       if (id) {
-        if (body) q.blocks.find((x) => x.id === id)!.body = body;
+        const existing = q.blocks.find((x) => x.id === id)!;
+        if (body) existing.body = body;
+        existing.externalEvent = true;
+        existing.posterRequired = posterRequired;
       } else
         insertBlock(q, {
+          externalEvent: true,
+          posterRequired,
           id: nextRecordId(q),
           template: "notice",
           title: a,
@@ -522,6 +548,7 @@ export type ImportDifference = {
   after: unknown;
 };
 const fieldLabels: Record<string, string> = {
+  posterRequired: "ポスター要否",
   university: "大学名",
   festival: "学園祭名",
   edition: "開催回数",

@@ -81,11 +81,18 @@ function flow(
       return [[text(o.x, o.y, o.w, "枠が小さすぎます。", 3, "#bb3322")]];
     for (
       let start = 0;
-      start < es.filter((e) => e.assetId && e.category !== "kitchen").length;
+      start <
+      es.filter(
+        (e) =>
+          e.assetId && e.category !== "kitchen" && e.posterRequired !== false,
+      ).length;
       start += capacity
     ) {
       if (start) next();
-      es.filter((e) => e.assetId && e.category !== "kitchen")
+      es.filter(
+        (e) =>
+          e.assetId && e.category !== "kitchen" && e.posterRequired !== false,
+      )
         .slice(start, start + capacity)
         .forEach((e, i) => {
           const x = o.x + (i % o.cols) * (cw + o.gap),
@@ -776,7 +783,9 @@ export function renderTemplate(
         } else if (o.kind === "image") {
           const posterEvent =
             o.binding === "event.poster"
-              ? sortedEvents(p).filter((event) => event.assetId)[page]
+              ? sortedEvents(p).filter(
+                  (event) => event.assetId && event.posterRequired !== false,
+                )[page]
               : undefined;
           const assignedAd =
             o.binding === "advertisement"

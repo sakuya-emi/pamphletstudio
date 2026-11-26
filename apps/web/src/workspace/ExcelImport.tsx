@@ -333,6 +333,14 @@ export function ExcelImport({
       {!rows.length && (
         <p>掲載情報が入ったExcelファイル（.xlsx）を選んでください。</p>
       )}
+      <p>
+        <a
+          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v2.xlsx`}
+          download
+        >
+          Excel雛形（ポスター要否列つき）をダウンロード
+        </a>
+      </p>
       <button
         type="button"
         className="excel-dropzone"

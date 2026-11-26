@@ -67,6 +67,9 @@ export function MediaIntake({
         )}
         <p>{summary.breakdown}</p>
         <p>
+          表紙を含み、非掲載の企画と「ポスター不要」の企画を除いた件数です。Excelや掲載設定を変えると件数も変わります。
+        </p>
+        <p>
           合計{summary.total}件 ／ 未登録{summary.missing}
           件。表紙から順に登録します。画像はあとから追加できます。
         </p>

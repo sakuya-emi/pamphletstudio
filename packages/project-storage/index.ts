@@ -278,6 +278,9 @@ export function validateProject(raw: unknown): Project {
       typeof b.id !== "string" ||
       !templates.includes(b.template) ||
       typeof b.title !== "string" ||
+      (b.posterRequired !== undefined &&
+        typeof b.posterRequired !== "boolean") ||
+      (b.externalEvent !== undefined && typeof b.externalEvent !== "boolean") ||
       (b.template === "ads" &&
         b.adSize !== undefined &&
         !["full", "half", "quarter"].includes(b.adSize))
@@ -297,6 +300,8 @@ export function validateProject(raw: unknown): Project {
       !["id", "name", "group", "building", "room", "location"].every(
         (k) => typeof (e as unknown as Record<string, unknown>)[k] === "string",
       ) ||
+      (e.posterRequired !== undefined &&
+        typeof e.posterRequired !== "boolean") ||
       (e.floor !== undefined && !Number.isFinite(e.floor))
     )
       throw new Error("企画データが不正です。");
