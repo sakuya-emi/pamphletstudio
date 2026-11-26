@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check deployment settings
+        id: deployment-settings
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -39,10 +40,11 @@ jobs:
             echo "::error::FTP_SERVER must be a hostname without ftp:// or ftps://."
             exit 1
           fi
-          if [[ "$FTP_SERVER_DIR" != */ ]]; then
-            echo "::error::FTP_SERVER_DIR must end with a slash."
+          if [[ "$FTP_SERVER_DIR" == *$'\n'* || "$FTP_SERVER_DIR" == *$'\r'* ]]; then
+            echo "::error::FTP_SERVER_DIR must be a single-line folder path."
             exit 1
           fi
+          printf 'server_dir=%s/\n' "${FTP_SERVER_DIR%/}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -70,6 +72,6 @@ jobs:
           protocol: ftps
           security: strict
           local-dir: ./dist/
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          server-dir: ${{ steps.deployment-settings.outputs.server_dir }}
           dangerous-clean-slate: false
           log-level: minimal

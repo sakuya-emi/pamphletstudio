@@ -11,7 +11,7 @@
 | FTP_SERVER | FTPS対応のFTPホスト名。`ftp://` 等のスキームを付けない |
 | FTP_USERNAME | FTPアカウント |
 | FTP_PASSWORD | FTPパスワード |
-| FTP_SERVER_DIR | FTPログイン後の、公開中の `pamphlet-studio/index.html` があるフォルダ。末尾 `/` 必須。例：`./pamphlet-studio/` |
+| FTP_SERVER_DIR | FTPログイン後の、公開中の `pamphlet-studio/index.html` があるフォルダ。末尾 `/` は自動で補います。例：`./pamphlet-studio/` |
 
 SFTPで表示される `/home/...` とFTPログイン後のパスは異なる場合があります。FTPから見える公開先を指定してください。このワークフローはFTPS（通常21番ポート）用で、SFTP用ではありません。TLS証明書の検証を有効にしています。
 
