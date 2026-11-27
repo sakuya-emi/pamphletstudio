@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import type { Project } from "../../../../packages/core/model";
 import {
   interpretRows,
+  importRowOrder,
   surveyConflictRows,
   inspectImportTarget,
   importDecision,
@@ -273,14 +274,7 @@ export function ExcelImport({
           if (kind === "sponsors")
             p.sponsors = p.sponsors.filter((s) => !ids.has(s.id));
         }
-        // Companies first, so ads from the same workbook can reuse their IDs.
-        const order = rows
-          .map((_, i) => i)
-          .sort(
-            (a, b) =>
-              Number(rows[b].sheet === "協賛企業") -
-              Number(rows[a].sheet === "協賛企業"),
-          );
+        const order = importRowOrder(rows);
         const chapterOrder: string[] = [];
         for (const i of order)
           if (effective[i]) {
@@ -361,10 +355,17 @@ export function ExcelImport({
       )}
       <p>
         <a
-          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v3.xlsx`}
+          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v4.xlsx`}
           download
         >
-          Excel雛形（アンケートURL・ポスター要否列つき）をダウンロード
+          Excel雛形v4（空欄版）をダウンロード
+        </a>
+        {" ／ "}
+        <a
+          href={`${import.meta.env.BASE_URL}templates/Pamphlet-Studio-Excel-template-v4-example.xlsx`}
+          download
+        >
+          記入例版（架空データ・参照用）
         </a>
       </p>
       <button

@@ -65,6 +65,33 @@ export type ImportRow = {
   error?: string;
   sample?: boolean;
 };
+/** Keep the legacy v3 registration order when template tabs are rearranged.
+ * Sponsors run first so ads reuse their IDs; order within each sheet is retained.
+ */
+export function importRowOrder(rows: readonly ImportRow[]): number[] {
+  const order: ImportSheet[] = [
+    "協賛企業",
+    "基本情報",
+    "アンケート",
+    "学生企画",
+    "模擬店",
+    "ステージ企画",
+    "学生ステージ企画",
+    "キッチンカー",
+    "広告",
+    "スタッフ",
+    "章・インデックス",
+    "挨拶",
+    "お知らせ・注意事項",
+    "外部・特別企画",
+    "ページ用テキスト",
+  ];
+  return rows
+    .map((_, i) => i)
+    .sort(
+      (a, b) => order.indexOf(rows[a].sheet) - order.indexOf(rows[b].sheet),
+    );
+}
 const norm = (s: string) =>
   s
     .normalize("NFKC")
