@@ -1,3 +1,4 @@
+import { adPlaceholderLabel } from "../../../../packages/templates/ads";
 import { eventCategory } from "../../../../packages/core/registration";
 import type { Project } from "../../../../packages/core/model";
 import type { LayoutPage } from "../../../../packages/layout-engine";
@@ -149,7 +150,7 @@ export function inputGuides(p: Project, page: LayoutPage): InputGuide[] {
       y: box?.y ?? y,
       w: box?.w ?? p.theme.adWidth,
       h: box?.h ?? h,
-      label: "広告を登録",
+      label: `${adPlaceholderLabel(p, ad?.id)}\n広告を登録`,
       target: {
         ...base,
         action: ad ? undefined : "ad",

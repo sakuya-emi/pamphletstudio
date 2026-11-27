@@ -9,6 +9,8 @@ import { roundedPath } from "../../../packages/designer/corners";
 import type { Project } from "../../../packages/core/model";
 import {
   fit,
+  wrap,
+  fallbackMeasure,
   type Node,
   type LayoutPage,
 } from "../../../packages/layout-engine";
@@ -207,42 +209,63 @@ export function Preview({
         ))}
       {!thumb &&
         onInput &&
-        inputGuides(project, page).map((g, i) => (
-          <g
-            key={"guide" + i}
-            role="button"
-            tabIndex={0}
-            aria-label={g.label}
-            className="input-guide"
-            onClick={(e) => {
-              e.stopPropagation();
-              onInput(g.target);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") onInput(g.target);
-            }}
-          >
-            <rect
-              x={g.x}
-              y={g.y}
-              width={g.w}
-              height={g.h}
-              fill="#f5f5f5"
-              fillOpacity=".9"
-              stroke="#777"
-              strokeDasharray="1 1"
-            />
-            <text
-              x={g.x + g.w / 2}
-              y={g.y + g.h / 2 + 1}
-              fontSize="3"
-              textAnchor="middle"
-              fill="#555"
+        inputGuides(project, page).map((g, i) => {
+          let size = 3;
+          let lines = wrap(
+            g.label,
+            Math.max(1, g.w - 6),
+            size,
+            fallbackMeasure,
+          );
+          while (lines.length * size * 1.4 > g.h - 4 && size > 1) {
+            size -= 0.1;
+            lines = wrap(g.label, Math.max(1, g.w - 6), size, fallbackMeasure);
+          }
+          return (
+            <g
+              key={"guide" + i}
+              role="button"
+              tabIndex={0}
+              aria-label={g.label}
+              className="input-guide"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInput(g.target);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onInput(g.target);
+              }}
             >
-              {g.label}
-            </text>
-          </g>
-        ))}
+              <rect
+                x={g.x}
+                y={g.y}
+                width={g.w}
+                height={g.h}
+                fill="#f5f5f5"
+                fillOpacity="1"
+                stroke="#777"
+                strokeDasharray="1 1"
+              />
+              {lines.map((line, index) => (
+                <text
+                  key={index}
+                  x={g.x + g.w / 2}
+                  y={
+                    g.y +
+                    (g.h - lines.length * size * 1.4) / 2 +
+                    size +
+                    index * size * 1.4
+                  }
+                  fontSize={size}
+                  textAnchor="middle"
+                  fill="#555"
+                >
+                  {line}
+                </text>
+              ))}
+            </g>
+          );
+        })}
       {active && onEdit && (
         <foreignObject
           x={Math.max(3, Math.min(75, active.x))}

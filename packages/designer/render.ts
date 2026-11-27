@@ -21,7 +21,7 @@ import {
 } from "../layout-engine/types";
 import type { DesignObject, DesignTemplate } from "./model";
 import { ellipsePath, pathData } from "./geometry";
-import { adPlaceholder } from "../templates/ads";
+import { adPlaceholder, adPlaceholderLabel } from "../templates/ads";
 export interface RenderContext {
   side: "left" | "right";
   number?: number;
@@ -815,10 +815,11 @@ export function renderTemplate(
             ns = adPlaceholder(
               o,
               o.binding === "advertisement"
-                ? "広告未設定"
+                ? adPlaceholderLabel(p, assignedAd?.id)
                 : o.binding === "event.poster"
                   ? "ポスター画像"
                   : "画像枠",
+              measure,
             );
         }
         nodes.push(...mark(ns, o, t.id));

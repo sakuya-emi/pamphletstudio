@@ -16,7 +16,13 @@ import type { Project, AdSize, Block } from "../core/model";
 import { cover } from "../templates/cover";
 import { eventPages } from "../templates/events";
 import { posterPages } from "../templates/posters";
-import { adBox, adCapacity, adPlaceholder, adHeight } from "../templates/ads";
+import {
+  adBox,
+  adCapacity,
+  adPlaceholder,
+  adPlaceholderLabel,
+  adHeight,
+} from "../templates/ads";
 import { contents, contentsRows, headingEntries } from "../templates/contents";
 import {
   fallbackMeasure,
@@ -424,7 +430,7 @@ function paginate(p: Project, measure: Measure, contentsCount: number): Layout {
             });
         } else {
           nodes.push(
-            ...adPlaceholder(box, ad ? "広告素材未登録" : "広告未設定"),
+            ...adPlaceholder(box, adPlaceholderLabel(p, ad?.id), measure),
           );
           issues.push({
             level: "warning",

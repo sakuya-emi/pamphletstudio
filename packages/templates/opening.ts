@@ -597,7 +597,7 @@ export function orderedSchedule(c: Context): Node[][] {
               ? mid - c.measure(timeLabel, timeSize, false) / 2
               : xx + 2,
             y + 2,
-            cellWidth - 3,
+            lineStyle ? c.measure(timeLabel, timeSize, false) : cellWidth - 3,
             timeLabel,
             timeSize,
             lineStyle ? p.theme.ink : j % 2 ? "#24343b" : "#ffffff",

@@ -220,6 +220,10 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, [feedback]);
   useEffect(() => setFeedback(null), [step, project.id]);
+  const scheduleReturn = useRef<{
+    projectId: string;
+    style: "bands" | "line";
+  } | null>(null);
   const sampleSession = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const undo = useRef<Project[]>([]),
@@ -254,7 +258,7 @@ export function App() {
     if (previous?.id === project.id && previous.count !== layout.pages.length) {
       const delta = layout.pages.length - previous.count;
       setPageChange(
-        `${pageChangeReason.current}による掲載内容・改ページ・白紙調整の再計算で、出力ページ数が${previous.count}から${layout.pages.length}ページに変わりました（${delta > 0 ? "+" : ""}${delta}ページ）。`,
+        `${pageChangeReason.current}時点では、掲載内容・改ページ・白紙調整の再計算で、出力ページ数が${previous.count}から${layout.pages.length}ページに変わりました（${delta > 0 ? "+" : ""}${delta}ページ）。`,
       );
     } else if (previous?.id !== project.id) setPageChange("");
     previousPages.current = { id: project.id, count: layout.pages.length };
@@ -1858,33 +1862,46 @@ export function App() {
               >
                 箇条書きを選ぶ
               </button>
-              {page.template === "stage" && (
+              {layout.pages.some((pg) => pg.template === "stage") && (
                 <button
                   aria-pressed={
                     !project.theme.scheduleStyle ||
                     project.theme.scheduleStyle === "compact"
                   }
                   onClick={() => {
-                    if (
-                      !project.theme.scheduleStyle ||
-                      project.theme.scheduleStyle === "compact"
-                    ) {
-                      showFeedback("すでにコンパクト配置です。");
-                      return;
-                    }
+                    const current = project.theme.scheduleStyle ?? "compact";
+                    const restore =
+                      scheduleReturn.current?.projectId === project.id
+                        ? scheduleReturn.current.style
+                        : "bands";
+                    const next = current === "compact" ? restore : "compact";
+                    if (current !== "compact")
+                      scheduleReturn.current = {
+                        projectId: project.id,
+                        style: current,
+                      };
                     update(
                       (p) => {
-                        p.theme.scheduleStyle = "compact";
+                        p.theme.scheduleStyle = next;
                       },
                       true,
-                      "タイムテーブルのコンパクト配置",
+                      "タイムテーブル配置の切替",
                     );
-                    showFeedback("タイムテーブルをコンパクト配置にしました。");
+                    const schedule = layout.pages.find(
+                      (pg) => pg.template === "stage",
+                    );
+                    if (schedule)
+                      setSelected(schedule.id.replace(/\/\d+$/, "/0"));
+                    showFeedback(
+                      next === "compact"
+                        ? "タイムテーブルをコンパクト配置にしました。"
+                        : `タイムテーブルを${next === "line" ? "細い時間軸と縦書き" : "色帯と縦書き"}に戻しました。`,
+                    );
                   }}
                 >
                   {!project.theme.scheduleStyle ||
                   project.theme.scheduleStyle === "compact"
-                    ? "タイムテーブル：コンパクト適用中"
+                    ? `タイムテーブル：コンパクト適用中（${scheduleReturn.current?.projectId === project.id && scheduleReturn.current.style === "line" ? "細い時間軸と縦書き" : "色帯と縦書き"}に戻す）`
                     : "タイムテーブルをコンパクトにする"}
                 </button>
               )}
