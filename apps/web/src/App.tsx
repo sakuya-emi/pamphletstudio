@@ -212,6 +212,14 @@ export function App() {
     [fitWidth, setFitWidth] = useState(650),
     [historyVersion, setHistoryVersion] = useState(0),
     [modal, setModal] = useState<null | "add" | "export" | "delete">(null);
+  const [feedback, setFeedback] = useState<{ message: string } | null>(null);
+  const showFeedback = (message: string) => setFeedback({ message });
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 6000);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+  useEffect(() => setFeedback(null), [step, project.id]);
   const sampleSession = useRef(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const undo = useRef<Project[]>([]),
@@ -246,7 +254,7 @@ export function App() {
     if (previous?.id === project.id && previous.count !== layout.pages.length) {
       const delta = layout.pages.length - previous.count;
       setPageChange(
-        `${pageChangeReason.current}による掲載内容・改ページ・白紙調整の再計算で、出力ページ数が${previous.count}から${layout.pages.length}ページに変わりました（${delta > 0 ? "+" : ""}${delta}ページ）。${outputPages(layout.pages.length, paddingCount)}`,
+        `${pageChangeReason.current}による掲載内容・改ページ・白紙調整の再計算で、出力ページ数が${previous.count}から${layout.pages.length}ページに変わりました（${delta > 0 ? "+" : ""}${delta}ページ）。`,
       );
     } else if (previous?.id !== project.id) setPageChange("");
     previousPages.current = { id: project.id, count: layout.pages.length };
@@ -1126,6 +1134,8 @@ export function App() {
               setComponentApply(null);
               setPendingComponent(null);
               setComponentDestination(null);
+              if (designPicker?.category === "箇条書き")
+                showFeedback("箇条書きのデザインを適用しました。");
               if (!inline) setDesignPicker(null);
             } catch (e) {
               setNotice(String(e));
@@ -1378,7 +1388,8 @@ export function App() {
 
       {pageChange && (
         <p className="page-change" role="status">
-          {pageChange}
+          {pageChange} 現在の構成：
+          {outputPages(layout.pages.length, paddingCount)}
         </p>
       )}
       <div className="route-position">
@@ -1849,17 +1860,32 @@ export function App() {
               </button>
               {page.template === "stage" && (
                 <button
-                  onClick={() =>
+                  aria-pressed={
+                    !project.theme.scheduleStyle ||
+                    project.theme.scheduleStyle === "compact"
+                  }
+                  onClick={() => {
+                    if (
+                      !project.theme.scheduleStyle ||
+                      project.theme.scheduleStyle === "compact"
+                    ) {
+                      showFeedback("すでにコンパクト配置です。");
+                      return;
+                    }
                     update(
                       (p) => {
                         p.theme.scheduleStyle = "compact";
                       },
                       true,
                       "タイムテーブルのコンパクト配置",
-                    )
-                  }
+                    );
+                    showFeedback("タイムテーブルをコンパクト配置にしました。");
+                  }}
                 >
-                  タイムテーブルをコンパクトにする
+                  {!project.theme.scheduleStyle ||
+                  project.theme.scheduleStyle === "compact"
+                    ? "タイムテーブル：コンパクト適用中"
+                    : "タイムテーブルをコンパクトにする"}
                 </button>
               )}
               <div className="segmented">
@@ -3182,7 +3208,7 @@ export function App() {
                                       activeProject.current,
                                       measure,
                                     );
-                                    setNotice(
+                                    showFeedback(
                                       `広告ページを追加して配置しました。出力${beforeTotal}→${afterLayout.pages.length}ページ、自動白紙${beforeBlank}→${automaticBlankCounts(afterLayout.pages).total}ページ。追加後の内訳は、章・見開きの開始位置調整${automaticBlankCounts(afterLayout.pages).start}ページ、総ページ数調整${automaticBlankCounts(afterLayout.pages).padding}ページです。`,
                                     );
                                     setSelected(`${id}/0`);
@@ -3511,6 +3537,17 @@ export function App() {
             aria-label="通知を閉じる"
           >
             ×
+          </button>
+        </div>
+      )}
+      {feedback && !notice && (
+        <div className="toast" role="status" aria-label="操作完了の通知">
+          {feedback.message}
+          <button
+            aria-label="操作完了の通知を閉じる"
+            onClick={() => setFeedback(null)}
+          >
+            <X size={16} />
           </button>
         </div>
       )}
