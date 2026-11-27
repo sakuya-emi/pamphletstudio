@@ -42,7 +42,15 @@ it("新規冊子の冒頭11ページに目次と左右のタイムテーブル�
 it("開始時刻順の均等枠を使い、終了時刻で位置を変更しない", () => {
   const p = createFestivalProject();
   p.theme.scheduleStyle = "bands";
-  for (const time of ["15:00", "09:30", "10:00", "14:00", "11:30"]) {
+  for (const time of [
+    "15:00",
+    "09:30",
+    "10:00",
+    "14:00",
+    "11:30",
+    "12:00",
+    "13:00",
+  ]) {
     const e = addEvent(p, "stage");
     e.name = time;
     e.startTime = time;
@@ -56,14 +64,14 @@ it("開始時刻順の均等枠を使い、終了時刻で位置を変更しな�
         (n) => n.kind === "rect" && n.source?.field === "startTime",
       ),
     );
-  expect([left.length, right.length]).toEqual([3, 2]);
+  expect([left.length, right.length]).toEqual([4, 3]);
   expect(
     [...left, ...right].map(
       (n) => p.events.find((e) => e.id === n.source?.id)?.startTime,
     ),
-  ).toEqual(["09:30", "10:00", "11:30", "14:00", "15:00"]);
+  ).toEqual(["09:30", "10:00", "11:30", "12:00", "13:00", "14:00", "15:00"]);
   expect(left[1].x - left[0].x).toBeCloseTo(left[2].x - left[1].x);
-  expect(right[1].x - right[0].x).toBeCloseTo(67.5);
+  expect(right[1].x - right[0].x).toBeCloseTo(45);
 });
 it("QRはURLのみで再生成でき、保存後も復元される", async () => {
   const p = createFestivalProject(),

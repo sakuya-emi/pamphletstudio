@@ -396,6 +396,80 @@ export function orderedSchedule(c: Context): Node[][] {
         numeric: true,
       }),
     );
+  // Preserve vertical lettering while grouping small schedules into a single card grid.
+  if (
+    p.theme.scheduleStyle === "bands" &&
+    items.length > 0 &&
+    items.length <= 6
+  ) {
+    const nodes: Node[] = [];
+    const columns = Math.min(2, items.length);
+    const rows = Math.ceil(items.length / columns);
+    const width = (120 - (columns - 1) * 4) / columns;
+    const height = Math.min(72, 144 / rows);
+    items.forEach((event, i) => {
+      const x = 14 + (i % columns) * (width + 4);
+      const y = 36 + Math.floor(i / columns) * height;
+      const dark = i % 2 ? "#65aa94" : "#2ba6c5";
+      nodes.push(rect(x, y, width, height - 3, i % 2 ? "#e0eee8" : "#e4f1f4"));
+      nodes.push({
+        ...rect(x, y, width, 8, dark),
+        source: { type: "event", id: event.id, field: "startTime" },
+      });
+      const time =
+        event.posterRequired === false && event.endTime
+          ? `${event.startTime || "—"}〜${event.endTime}`
+          : event.startTime || "—";
+      nodes.push({
+        ...text(
+          x + 3,
+          y + 2,
+          width - 6,
+          time,
+          Math.min(3.5, (width - 6) / Math.max(1, c.measure(time, 1, true))),
+          "#ffffff",
+          true,
+        ),
+        source: { type: "event", id: event.id, field: "startTime" },
+      });
+      const chars = Array.from(event.name).filter((ch) => ch !== "\n");
+      let font = 5.1;
+      while (
+        font > 0.5 &&
+        Math.floor((height - 19) / (font * 1.18)) *
+          Math.floor((width - 8) / font) <
+          chars.length
+      )
+        font -= 0.1;
+      const maxRows = Math.max(1, Math.floor((height - 19) / (font * 1.18)));
+      const nameColumns = Math.ceil(chars.length / maxRows);
+      chars.forEach((ch, k) => {
+        const xx =
+          x +
+          width / 2 +
+          ((nameColumns - 1) * font) / 2 -
+          Math.floor(k / maxRows) * font -
+          font / 2;
+        const yy = y + 13 + (k % maxRows) * font * 1.18;
+        nodes.push({
+          ...text(xx, yy, font * 1.25, ch, font, p.theme.ink, true),
+          ...verticalMark(ch, xx, yy, font),
+          source: { type: "event", id: event.id, field: "name" },
+        });
+      });
+    });
+    nodes.push(
+      text(
+        18,
+        187,
+        108,
+        "※当日の状況によりタイムスケジュールを変更する場合があります。",
+        2.5,
+        p.theme.ink,
+      ),
+    );
+    return [nodes];
+  }
   // Small schedules use one full-width card list rather than two sparse spread pages.
   if (
     (!p.theme.scheduleStyle || p.theme.scheduleStyle === "compact") &&
